@@ -1,6 +1,6 @@
 package GameObjects.TeamsAndPlayers;
 
-import static Functions.GenerateFunctions.generate0To100;
+import static Functions.Functions.randomNumber0to100;
 
 public class Stat {
 
@@ -36,14 +36,27 @@ public class Stat {
     }
 
     public static Stat generateRandomStats() {
-        int laning = generate0To100();
-        int teamfighting = generate0To100();
-        int economy = generate0To100();
-        int consistency = generate0To100();
-        int teamwork = generate0To100();
-        int aggression = generate0To100();
-        int stamina = generate0To100();
-        int potential = generate0To100();
+        int laning = randomNumber0to100();
+        int teamfighting = randomNumber0to100();
+        int economy = randomNumber0to100();
+        int consistency = randomNumber0to100();
+        int teamwork = randomNumber0to100();
+        int aggression = randomNumber0to100();
+        int stamina = randomNumber0to100();
+        int potential = randomNumber0to100();
+
+        return new Stat(laning, teamfighting, economy, consistency, teamwork, aggression, stamina, potential);
+    }
+
+    public static Stat generatePerfectStat() {
+        int laning = 100;
+        int teamfighting = 100;
+        int economy = 100;
+        int consistency = 100;
+        int teamwork = 100;
+        int aggression = 100;
+        int stamina = 100;
+        int potential = 100;
 
         return new Stat(laning, teamfighting, economy, consistency, teamwork, aggression, stamina, potential);
     }

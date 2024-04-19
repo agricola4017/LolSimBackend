@@ -1,6 +1,7 @@
 package GameObjects.TeamsAndPlayers;
 
-import static Functions.GenerateFunctions.generateStatRangeInclusive;
+
+import static Functions.Functions.randomNumberCustom;
 
 public enum Position {
     top,
@@ -9,10 +10,10 @@ public enum Position {
     adc,
     spt;
 
-    private static Position[] positions = Position.values();
+    private final static Position[] positions = Position.values();
 
     public static Position generateRandomPosition() {
-        return positions[generateStatRangeInclusive(0, positions.length - 1)];
+        return positions[randomNumberCustom(0, positions.length - 1)];
     }
 
     public static Position[] getPositions() {

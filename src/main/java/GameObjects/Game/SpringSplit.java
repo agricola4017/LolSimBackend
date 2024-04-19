@@ -12,7 +12,7 @@ class SpringSplit extends Season {
     private int oneSetCount;
 
     private final static String name = "Spring Split";
-    SpringSplit(List<Integer> teams) {
+    SpringSplit(List<Team> teams) {
         this.oneSetCount = teams.size()/2;
         this.matchesToBePlayed = new LinkedList<>();
 
@@ -22,8 +22,8 @@ class SpringSplit extends Season {
 
         //assume teams is even and > 2, if odd incorporate bye (But skip for now)
 
-        List<Integer> teamList1 = new ArrayList<>();
-        List<Integer> teamList2 = new ArrayList<>();
+        List<Team> teamList1 = new ArrayList<>();
+        List<Team> teamList2 = new ArrayList<>();
 
         //break into two, 2nd list is reversed
         for (int i = 0; i < teams.size()/2; i++) {
@@ -51,7 +51,7 @@ class SpringSplit extends Season {
 
         for (int i = 0; i < teams.size()/2; i++) {
             teamList1.add(teams.get(i));
-            teamList2.add(teams.get(i) + teams.size()/2);
+            teamList2.add(teams.get(i + teams.size()/2));
         }
 
         //make vertical matches
@@ -95,7 +95,7 @@ class SpringSplit extends Season {
         return name;
     }
 
-    public Season newInstance(List<Integer> teams) {
+    public Season newInstance(List<Team> teams) {
         return new SpringSplit(teams);
     }
 }

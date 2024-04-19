@@ -67,6 +67,19 @@ public class Player {
 
         return new Player(playerID, playerName, teamId, age, position, value, stat, region);
     }
+
+    public static Player generatePerfectPlayer(int teamId) {
+        int playerID = counter; //grab latest id
+        String playerName = "test" + playerID; //generate name
+        int age = 17;
+        Position position = Position.generateRandomPosition();
+        float value = 65.00f;
+        Stat stat = Stat.generatePerfectStat();
+        Region region = Region.generateRandomRegion();
+        counter++;
+
+        return new Player(playerID, playerName, teamId, age, position, value, stat, region);
+    }
     public int getPlayerID() {
         return playerID;
     }
@@ -134,14 +147,15 @@ public class Player {
     @Override
     public String toString() {
         return "Player{" +
-                "playerID=" + playerID +
+                //"playerID=" + playerID +
                 ", playerName='" + playerName + '\'' +
-                ", teamID=" + teamID +
-                ", age=" + age +
+                //", teamID=" + teamID +
+                //", age=" + age +
                 ", position=" + position +
-                ", value=" + value +
-                ", stat=" + stat +
-                ", region=" + region +
+                //", value=" + value +
+                //", stat=" + stat +
+                //", region=" + region +
+                ", OVR= " + stat.getOVR() +
                 '}';
     }
 }

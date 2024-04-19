@@ -1,15 +1,17 @@
 package GameObjects.Game;
 
+import GameObjects.TeamsAndPlayers.Team;
+
 public class Standing implements Comparable<Standing> {
 
     private int wins;
     private int losses;
-    private int teamID;
+    private Team team;
 
-    public Standing(int teamid) {
+    public Standing(Team team) {
         this.wins = 0;
         this.losses = 0;
-        this.teamID = teamid;
+        this.team = team;
     }
 
     @Override
@@ -48,12 +50,12 @@ public class Standing implements Comparable<Standing> {
         this.losses = losses;
     }
 
-    public int getTeamID() {
-        return teamID;
+    public Team getTeam() {
+        return team;
     }
 
     @Override
     public String toString() {
-        return teamID + " - " + wins + "/" + (wins+losses);
+        return team.getTeamName() + " - " + wins + " - " + (losses) + " | " +(wins+losses);
     }
 }

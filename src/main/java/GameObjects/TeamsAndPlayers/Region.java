@@ -1,6 +1,6 @@
 package GameObjects.TeamsAndPlayers;
 
-import static Functions.GenerateFunctions.generateStatRangeInclusive;
+import static Functions.Functions.randomNumberCustom;
 
 public enum Region {
     NA,
@@ -14,10 +14,10 @@ public enum Region {
     BR,
     TW;
 
-    private static Region[] regions = Region.values();
+    private final static Region[] regions = Region.values();
 
     public static Region generateRandomRegion() {
-        return regions[generateStatRangeInclusive(0, regions.length - 1)];
+        return regions[randomNumberCustom(0, regions.length - 1)];
     }
 
     public static Region[] getRegions() {

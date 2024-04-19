@@ -61,5 +61,5 @@ public abstract class Season {
 
     abstract Queue<Match> getMatchesToBePlayed();
 
-    abstract Season newInstance(List<Integer> teams);
+    abstract Season newInstance(List<Team> teams);
 }

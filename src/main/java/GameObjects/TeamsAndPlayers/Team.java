@@ -1,5 +1,7 @@
 package GameObjects.TeamsAndPlayers;
 
+import GameObjects.Game.PlayerRoster;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,17 +9,20 @@ public class Team {
     private int teamID;
     private String teamName;
     private List<Player> players;
+    private PlayerRoster playerRoster;
 
     public Team(int teamID, String teamName) {
         this.teamID = teamID;
         this.teamName = teamName;
         this.players = new ArrayList<>();
+        this.playerRoster = new PlayerRoster();
     }
 
     public Team(int teamID, String teamName, List<Player> players) {
         this.teamID = teamID;
         this.teamName = teamName;
         this.players = players;
+        this.playerRoster = new PlayerRoster(players);
     }
 
     public List<Player> getPlayers() {
@@ -51,5 +56,23 @@ public class Team {
 
     public void setTeamName(String teamName) {
         this.teamName = teamName;
+    }
+
+    public PlayerRoster getPlayerRoster() {
+        return playerRoster;
+    }
+
+    public void setPlayerRoster(PlayerRoster playerRoster) {
+        this.playerRoster = playerRoster;
+    }
+
+    @Override
+    public String toString() {
+        return "Team{" +
+                "teamID=" + teamID +
+                ", teamName='" + teamName + '\'' +
+                //", players=" + players +
+                ", playerRoster=" + playerRoster +
+                '}';
     }
 }

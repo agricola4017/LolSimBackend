@@ -11,7 +11,7 @@ import java.util.List;
 class Repository {
 
     private static Repository db;
-    Repository() {
+    private Repository() {
     }
 
     static Repository getRepository() {
