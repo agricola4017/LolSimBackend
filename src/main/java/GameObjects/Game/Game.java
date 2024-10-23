@@ -26,7 +26,7 @@ public class Game {
     //stores teamid -> win, loss
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException{
         System.out.println("Game is starting");
 
         /**
@@ -53,79 +53,9 @@ public class Game {
 
         seasonsToPlay.add(springSplit);
 
-        while(gameIsRunning) {
-            //initialize standings
-            initStandings();
-            Season currentSeason = seasonsToPlay.poll();
-            System.out.println(currentSeason.getName());
+        playGame();
 
-            //+seasonsToPlay.add(springSplit.newInstance(new ArrayList<>(teams)));
 
-            /*for (Match a: currentSeason.getMatchesToBePlayed()) {
-                System.out.println(a);
-            }*/
-
-            int count = 1;
-            while (!currentSeason.isFinished()) {
-                for (Team t: teams) {
-                    t.getPlayerRoster().normalizePlayers(t.getPlayers());
-                }
-                //pause thread until something comes
-                Thread.sleep(50);
-                if (count > currentSeason.getOneSetCount()) {
-                    count = 1;
-                    //balance teams
-                    Collections.sort(standings);
-                    System.out.println(standings);
-                } else {
-                    Match match = currentSeason.playMatch();
-                    System.out.println(match);
-
-                    Team winner = match.getMatchLog().getWinner();
-                    Team loser = match.getMatchLog().getLoser();
-
-                    teamToStandingMap.get(winner).wonGame();
-                    teamToStandingMap.get(loser).lostGame();
-
-                    count++;
-                }
-            }
-            Collections.sort(standings);
-            System.out.println("Final Standings");
-            int j = 1;
-            for (Standing standing: standings) {
-                System.out.println(j + ". " + standing);
-                j++;
-            }
-            System.out.println("OVR Standings");
-            SortedMap<Integer, List<Team>> ovrToTeamMap = new TreeMap<>(Collections.reverseOrder());
-            for (Team team: teams) {
-                if (ovrToTeamMap.containsKey(team.getPlayerRoster().getOVR())) {
-                    ovrToTeamMap.get(team.getPlayerRoster().getOVR()).add(team);
-                } else {
-                    List<Team> teamlistInMap = new ArrayList<>();
-                    teamlistInMap.add(team);
-                    ovrToTeamMap.put(team.getPlayerRoster().getOVR(), teamlistInMap);
-                }
-            }
-
-            int i = 1;
-            for (SortedMap.Entry<Integer,  List<Team>> entry: ovrToTeamMap.entrySet()) {
-                for (Team team: entry.getValue()) {
-                    System.out.println(i + ". " + team.getTeamName() + " " + entry.getKey());
-                    i++;
-                }
-            }
-
-            System.out.println("Winner is " + standings.get(0));
-            oldStandings = standings;
-            standings = new ArrayList<>();
-            teamToStandingMap = new HashMap<>();
-
-            //remember old teamToStanding as well?
-
-            gameIsRunning = !seasonsToPlay.isEmpty();
-        }
         //What does a game need
         //load state, save state
 
@@ -137,6 +67,112 @@ public class Game {
         //cycle seasons
 
         //
+    }
+
+    static void playGame() throws InterruptedException{
+        int splitCount = 0;
+        while(gameIsRunning) {
+
+            //initialize standings
+            initStandings();
+
+            playSeason(splitCount);
+
+            Collections.sort(standings);
+
+            printStandings();
+
+            cleanupLeague();
+
+            splitCount++;
+            gameIsRunning = !seasonsToPlay.isEmpty();
+        }
+    }
+
+    static void printStandings() {
+        System.out.println("Final Standings");
+
+        int j = 1;
+        for (int i = 0; i < standings.size(); i++) {
+            Standing standing = standings.get(i);
+            String standingOutput = j + ". " + standing + " (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " , Prev. Seasons ";
+            if (oldStandings != null) {
+                standingOutput += oldStandings.get(i);
+            } else {
+                standingOutput += "0-0";
+            }
+            System.out.println(standingOutput);
+            j++;
+        }
+        System.out.println("OVR Standings");
+        SortedMap<Integer, List<Team>> ovrToTeamMap = new TreeMap<>(Collections.reverseOrder());
+        for (Team team : teams) {
+            if (ovrToTeamMap.containsKey(team.getPlayerRoster().getOVR())) {
+                ovrToTeamMap.get(team.getPlayerRoster().getOVR()).add(team);
+            } else {
+                List<Team> teamlistInMap = new ArrayList<>();
+                teamlistInMap.add(team);
+                ovrToTeamMap.put(team.getPlayerRoster().getOVR(), teamlistInMap);
+            }
+        }
+
+        int i = 1;
+        for (SortedMap.Entry<Integer, List<Team>> entry : ovrToTeamMap.entrySet()) {
+            for (Team team : entry.getValue()) {
+                System.out.println(i + ". " + team.getTeamName() + " " + entry.getKey());
+                i++;
+            }
+        }
+
+        System.out.println("Winner is " + standings.get(0));
+    }
+
+    static void cleanupLeague() {
+        oldStandings = standings;
+        standings = new ArrayList<>();
+        teamToStandingMap = new HashMap<>();
+
+        //remember old teamToStanding as well?
+
+        //repopulate teams in order
+        teams.clear();
+        for (Standing s : oldStandings) {
+            teams.add(s.getTeam());
+        }
+
+        seasonsToPlay.add(new SpringSplit(teams));
+    }
+
+    static void playSeason(int splitCount) throws InterruptedException {
+        Season currentSeason = seasonsToPlay.poll();
+        System.out.println(currentSeason.getName() + " " + splitCount);
+
+        int count = 1;
+        while (!currentSeason.isFinished()) {
+            for (Team t : teams) {
+                t.getPlayerRoster().normalizePlayers(t.getPlayers());
+            }
+            //pause thread until something comes
+            Thread.sleep(10);
+
+            if (count > currentSeason.getOneSetCount()) {
+                count = 1;
+                //balance teams
+                Collections.sort(standings);
+                //System.out.println(standings);
+            } else {
+                Match match = currentSeason.playMatch();
+                //System.out.println(match);
+
+                Team winner = match.getMatchLog().getWinner();
+                Team loser = match.getMatchLog().getLoser();
+
+                teamToStandingMap.get(winner).wonGame();
+                teamToStandingMap.get(loser).lostGame();
+
+                count++;
+            }
+        }
     }
 
     static void testTeams() {
@@ -171,6 +207,14 @@ public class Game {
         teams.add(team8);
         teams.add(team9);
         teams.add(team10);
+    }
+
+    static void testTeams100() {
+        for (int i = 0; i < 100; i++) {
+            Team team = new Team(i, "team" + i);
+            teamMap.put(i, team);
+            teams.add(team);
+        }
     }
 
     static void testPlayers() {

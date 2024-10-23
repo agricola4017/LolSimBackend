@@ -56,6 +56,6 @@ public class Standing implements Comparable<Standing> {
 
     @Override
     public String toString() {
-        return team.getTeamName() + " - " + wins + " - " + (losses) + " | " +(wins+losses);
+        return team.getTeamName() + ": " + wins + "-" + (losses) + " | " +(wins+losses);
     }
 }

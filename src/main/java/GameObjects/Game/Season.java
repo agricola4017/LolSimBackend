@@ -46,6 +46,8 @@ public abstract class Season {
      */
 
     private Queue<Match> matchesToBePlayed;
+
+    //how many matches played in one set
     private int oneSetCount;
     private String name;
     Match playMatch() {
@@ -62,4 +64,5 @@ public abstract class Season {
     abstract Queue<Match> getMatchesToBePlayed();
 
     abstract Season newInstance(List<Team> teams);
+
 }

@@ -11,14 +11,14 @@ public class testMatch {
     static List<Player> activePlayers = new ArrayList<>();
     public static void main(String[] args) {
         testTeams();
-        testPlayers2();
+        testPlayers();
 
         teams.get(0).getPlayerRoster().normalizePlayers(teams.get(0).getPlayers());
         teams.get(1).getPlayerRoster().normalizePlayers(teams.get(1).getPlayers());
 
         int t1win = 0;
         int t2win = 0;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             Match a = new Match(teams.get(0), teams.get(1), 1);
             a.playMatch();
             if (a.getMatchLog().getWinner() == teams.get(0)) {

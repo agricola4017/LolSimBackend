@@ -1,8 +1,5 @@
 package Database;
-import GameObjects.TeamsAndPlayers.Player;
-import GameObjects.TeamsAndPlayers.Position;
-import GameObjects.TeamsAndPlayers.Region;
-import GameObjects.TeamsAndPlayers.Stat;
+import GameObjects.TeamsAndPlayers.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -34,6 +31,31 @@ class Repository {
             System.err.println(e.getMessage());
             return null;
         }
+    }
+
+    List<Team> getActiveTeams() {
+        List<Team> teams = new ArrayList<>();
+
+        String sql = "SELECT * from teams t";
+
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement()) {
+
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                String teamName = rs.getString("playername");
+                int teamId = rs.getInt("teamid");
+
+                Team team = new Team(teamId, teamName);
+                teams.add(team);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return teams;
     }
 
     List<Player> getActivePlayers() {
@@ -75,6 +97,12 @@ class Repository {
         return players;
     }
 
+    int addPlayers(List<Player> players) {
+        for (Player player: players) {
+            addPlayer((player));
+        }
+        return -1;
+    }
     int addPlayer(Player player) {
 
         //logic to parse if teamid is in db

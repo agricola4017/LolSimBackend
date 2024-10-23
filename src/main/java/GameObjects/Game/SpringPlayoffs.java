@@ -7,23 +7,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-class SpringSplit extends Season {
+class SpringPlayoffs extends Season {
     private Queue<Match> matchesToBePlayed;
     private int oneSetCount;
 
-    private final static String name = "Spring Split";
+    private final static String name = "Spring Playoffs";
 
     /**
      * TODO: consider moving all this organization to a 'start' method
      * outputs - matchesToBePlayed : schedule
      * @param teams
      */
-    SpringSplit(List<Team> teams) {
+
+    SpringPlayoffs() {
+
+    }
+
+    SpringPlayoffs(List<Team> teams) {
         this.oneSetCount = teams.size()/2;
         this.matchesToBePlayed = new LinkedList<>();
 
         /**
-         * rotating algorithm for round robin
+         * 1st vs last, 2nd vs next last
          */
 
         //assume teams is even and > 2, if odd incorporate bye (But skip for now)
@@ -102,6 +107,6 @@ class SpringSplit extends Season {
     }
 
     public Season newInstance(List<Team> teams) {
-        return new SpringSplit(teams);
+        return new SpringPlayoffs(teams);
     }
 }
