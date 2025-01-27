@@ -146,16 +146,14 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player{" +
-                //"playerID=" + playerID +
-                ", playerName='" + playerName + '\'' +
+        return "" +//"playerID=" + playerID +
+                "playerName='" + playerName + '\'' +
                 //", teamID=" + teamID +
                 //", age=" + age +
                 ", position=" + position +
                 //", value=" + value +
                 //", stat=" + stat +
                 //", region=" + region +
-                ", OVR= " + stat.getOVR() +
-                '}';
+                ", OVR= " + stat.getOVR();
     }
 }

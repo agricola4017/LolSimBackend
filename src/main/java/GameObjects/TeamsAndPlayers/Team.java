@@ -1,7 +1,5 @@
 package GameObjects.TeamsAndPlayers;
 
-import GameObjects.Game.PlayerRoster;
-
 import java.util.ArrayList;
 import java.util.List;
 

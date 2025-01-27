@@ -14,8 +14,8 @@ public class Game {
     static List<Standing> standings;
     static List<Standing> oldStandings;
     static Map<Team, Standing> teamToStandingMap;
-    static List<Player> activePlayers;
-
+    static List<Player> activePlayers;;  
+    static Scanner scanner = new Scanner(System.in);
     //win,loss, teamid
     // after update, local sort
     // h2h records
@@ -69,6 +69,47 @@ public class Game {
         //
     }
 
+     static void awaitPlayerPrompt(int splitCount, Season currentSeason) throws InterruptedException {
+    
+        System.out.println("Options");
+        System.out.println("--------------------------------------");
+         System.out.println("1: play season\n2: play game\n3: see team info\n4: see standings");
+        System.out.println("Enter command: ");
+        String input = scanner.nextLine();
+
+        switch (input) {
+            case "1":
+            case "play season":
+                playSeason(currentSeason, splitCount);
+                break;
+            case "2":
+            case "play game":
+                MatchLog matchLog = playMatch(currentSeason, splitCount);
+                if (matchLog != null) {
+                    System.out.println("Match is finished");
+                    System.out.println(matchLog.toString());
+                } else {
+                    System.out.println("Season is finished");
+                }
+                break;
+            case "3":
+            case "see team info":
+                System.out.println(teams.get(0).getPlayerRoster().toString());
+                System.out.println(teamToStandingMap.get(teams.get(0)));
+                break;
+            case "4":
+            case "see standings":
+                Collections.sort(standings);
+                printStandings();
+                break;
+            case "5": 
+                System.out.println(teams.get(0).getPlayers());
+                break;
+            default:
+                break;
+        }
+    }
+
     static void playGame() throws InterruptedException{
         int splitCount = 0;
         while(gameIsRunning) {
@@ -76,7 +117,12 @@ public class Game {
             //initialize standings
             initStandings();
 
-            playSeason(splitCount);
+            Season currentSeason = seasonsToPlay.poll();
+            System.out.println(currentSeason.getName() + " " + splitCount);
+
+            while (!currentSeason.isFinished()) {
+                awaitPlayerPrompt(splitCount, currentSeason);
+            }
 
             Collections.sort(standings);
 
@@ -143,9 +189,7 @@ public class Game {
         seasonsToPlay.add(new SpringSplit(teams));
     }
 
-    static void playSeason(int splitCount) throws InterruptedException {
-        Season currentSeason = seasonsToPlay.poll();
-        System.out.println(currentSeason.getName() + " " + splitCount);
+    static void playSeason(Season currentSeason, int splitCount) throws InterruptedException {
 
         int count = 1;
         while (!currentSeason.isFinished()) {
@@ -161,17 +205,25 @@ public class Game {
                 Collections.sort(standings);
                 //System.out.println(standings);
             } else {
-                Match match = currentSeason.playMatch();
-                //System.out.println(match);
-
-                Team winner = match.getMatchLog().getWinner();
-                Team loser = match.getMatchLog().getLoser();
-
-                teamToStandingMap.get(winner).wonGame();
-                teamToStandingMap.get(loser).lostGame();
-
+                playMatch(currentSeason, splitCount);
                 count++;
             }
+        }
+    }
+
+    static MatchLog playMatch(Season currentSeason, int splitCount) {
+        if (!currentSeason.isFinished()) {
+            Match match = currentSeason.playMatch();
+            //System.out.println(match);
+
+            Team winner = match.getMatchLog().getWinner();
+            Team loser = match.getMatchLog().getLoser();
+
+            teamToStandingMap.get(winner).wonGame();
+            teamToStandingMap.get(loser).lostGame();
+            return match.getMatchLog();
+        } else {
+            return null;
         }
     }
 
@@ -224,6 +276,7 @@ public class Game {
                 activePlayers.add(player);
                 teamMap.get(i).addPlayer(player);
             }
+            teamMap.get(i).getPlayerRoster().normalizePlayers(teamMap.get(i).getPlayers());
         }
     }
 

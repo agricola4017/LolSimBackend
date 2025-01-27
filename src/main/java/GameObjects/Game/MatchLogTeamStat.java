@@ -1,6 +1,7 @@
 package GameObjects.Game;
 
 import GameObjects.TeamsAndPlayers.Player;
+import GameObjects.TeamsAndPlayers.Position;
 import GameObjects.TeamsAndPlayers.Team;
 
 import java.util.Map;
@@ -85,11 +86,17 @@ public class MatchLogTeamStat {
 
     @Override
     public String toString() {
-        return "MatchLogTeamStat{" +
-                "kills=" + kills +
-                ", deaths=" + deaths +
-                ", cs=" + cs +
-                ", gold=" + gold +
-                '}';
+        String ret = "";
+        int posIter = 0;
+        for (Map.Entry<Player,MatchLogPlayerStat> playerToStat : playerToPlayerStatMap.entrySet()) {
+            Player player = playerToStat.getKey();
+            MatchLogPlayerStat matchLogPlayerStat = playerToStat.getValue();
+            ret += Position.values()[posIter] + " - " + player.getPlayerName() + " | ";
+            ret += "KDA: " + matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths() + " ";
+            ret += "CS: " + matchLogPlayerStat.getCs() + " " + "Gold: " + matchLogPlayerStat.getGold();
+            ret += "\n";
+            posIter++;
+        }
+        return ret;
     }
 }

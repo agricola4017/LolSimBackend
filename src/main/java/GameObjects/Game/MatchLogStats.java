@@ -4,6 +4,8 @@ import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
 
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MatchLogStats {
     private Map<Team, MatchLogTeamStat> matchLogTeamStatMap;
@@ -24,9 +26,16 @@ public class MatchLogStats {
 
     @Override
     public String toString() {
-        return "MatchLogStats{" +
-                "matchLogTeamStatMap=" + matchLogTeamStatMap +
-                '}';
+        List<MatchLogTeamStat> values = new ArrayList<>(matchLogTeamStatMap.values());
+        String ret = "Match Log Stats: \n";
+        ret +="Kills: " + values.get(0).getKills() + " - " + values.get(1).getKills() + "\n";
+        ret += "Deaths: " + values.get(0).getDeaths() + " - " + values.get(1).getDeaths() + "\n";
+        ret += "CS: " + values.get(0).getCs() + " - " + values.get(1).getCs() + "\n";
+        ret += "Gold: " + values.get(0).getGold() + " - " + values.get(1).getGold() + "\n";
+        ret += "------------------------\n";
+        ret += values.get(0).toString() + "\n";
+        ret += values.get(1).toString();
+        return ret;
     }
 }
 
