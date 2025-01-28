@@ -1,5 +1,7 @@
 package Functions;
 
+import java.util.List;
+
 public class Functions {
 
     public static int randomNumberCustom(int min, int max) {
@@ -19,5 +21,13 @@ public class Functions {
 
     public static boolean rollGreaterThanPercentile(int bound, int percentile) {
         return randomNumberCustom(bound, 100) > percentile;
+    }
+
+    public static <T> String flattenListString(List<T> list) {
+        String ret = "";
+        for (T o : list) {
+            ret += o.toString() + "\n";
+        }
+        return ret;
     }
 }

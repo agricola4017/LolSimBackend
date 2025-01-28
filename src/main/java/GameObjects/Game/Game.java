@@ -1,10 +1,20 @@
 package GameObjects.Game;
 
+import GameObjects.Game.GameUI.GameControllerUI;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
-import com.sun.source.tree.Tree;
+import GameObjects.TeamsAndPlayers.Position;
+
+import javax.swing.*;
+
+import static Functions.Functions.flattenListString;
+
+import java.awt.event.*;
+
+import GameObjects.Game.GameUI.GameUIGeneral;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 public class Game {
     static boolean gameIsRunning = true;
@@ -14,8 +24,9 @@ public class Game {
     static List<Standing> standings;
     static List<Standing> oldStandings;
     static Map<Team, Standing> teamToStandingMap;
-    static List<Player> activePlayers;;  
-    static Scanner scanner = new Scanner(System.in);
+    static List<Player> activePlayers;
+    static CountDownLatch latch;
+    static int latch_flag;
     //win,loss, teamid
     // after update, local sort
     // h2h records
@@ -28,7 +39,6 @@ public class Game {
 
     public static void main(String[] args) throws InterruptedException{
         System.out.println("Game is starting");
-
         /**
          * load players and teams
          */
@@ -38,6 +48,8 @@ public class Game {
         teamMap = new HashMap<Integer, Team>();
         standings = new ArrayList<>();
         teamToStandingMap = new HashMap<>();
+        latch = new CountDownLatch(latch_flag);
+        latch_flag = 0;
 
         //sql calls to load
         testTeams();
@@ -69,49 +81,172 @@ public class Game {
         //
     }
 
-     static void awaitPlayerPrompt(int splitCount, Season currentSeason) throws InterruptedException {
-    
-        System.out.println("Options");
-        System.out.println("--------------------------------------");
-         System.out.println("1: play season\n2: play game\n3: see team info\n4: see standings");
-        System.out.println("Enter command: ");
-        String input = scanner.nextLine();
+    static void setupActionListeners(GameControllerUI gameControllerUI, Season currentSeason, int splitCount) {
+        JButton playSeasonButton = gameControllerUI.getPlaySeasonButton();
+        JButton playGameButton = gameControllerUI.getPlayGameButton();
+        JButton seeTeamInfoButton = gameControllerUI.getSeeTeamInfoButton();
+        JButton seeStandingsButton = gameControllerUI.getSeeStandingsButton();
+        JButton seePlayersButton = gameControllerUI.getSeePlayersButton();
+        JButton signPlayerButton = gameControllerUI.getSignPlayerButton();    
 
-        switch (input) {
-            case "1":
-            case "play season":
+        // Add action listeners to buttons
+        playSeasonButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add logic to play season
+                if (latch_flag > 0) {
+                    try {
+                        awaitPlayerPrompt(1, splitCount, currentSeason);
+                    } catch (InterruptedException ex) {
+                        System.out.println("Interrupted");
+                    }
+                }
+                latch.countDown();
+                latch_flag--;
+            }
+        });
+
+        playGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add logic to play game
+                try {
+                    if (latch_flag > 0) {
+                        awaitPlayerPrompt(2, splitCount, currentSeason);
+                    }
+                } catch (InterruptedException ex) {
+                    System.out.println("Interrupted");
+                }
+                latch.countDown();
+                latch_flag--;
+            }
+        });
+
+        seeTeamInfoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add logic to see team info
+                try {
+                    if (latch_flag > 0) {
+                        awaitPlayerPrompt(3, splitCount, currentSeason);
+                    }
+                } catch (InterruptedException ex) {
+                    System.out.println("Interrupted");
+                }
+                latch.countDown();
+                latch_flag--;
+            }
+        });
+
+        seeStandingsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add logic to see standings
+                try {   
+                    if (latch_flag > 0) {
+                        awaitPlayerPrompt(4, splitCount, currentSeason);
+                    }
+                } catch (InterruptedException ex) {
+                    System.out.println("Interrupted");
+                }
+                latch.countDown();
+                latch_flag--;
+            }
+        });
+
+        seePlayersButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add logic to see players
+                try {
+                    if (latch_flag > 0) {
+                        awaitPlayerPrompt(5, splitCount, currentSeason);
+                    }
+                } catch (InterruptedException ex) {
+                    System.out.println("Interrupted");
+                }
+                latch.countDown();
+                latch_flag--;
+            }
+        });
+
+        signPlayerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add logic to sign player
+                try {
+                    if (latch_flag > 0) {
+                        awaitPlayerPrompt(6, splitCount, currentSeason);
+                    }
+                } catch (InterruptedException ex) {
+                    System.out.println("Interrupted");
+                }
+                latch.countDown();
+                latch_flag--;
+            }
+        });
+    }
+
+    static void awaitPlayerPrompt(int caseValue, int splitCount, Season currentSeason) throws InterruptedException{
+
+        switch(caseValue) {
+            case 1:
+                //play season
                 playSeason(currentSeason, splitCount);
                 break;
-            case "2":
-            case "play game":
+            case 2:
+                //play game
                 MatchLog matchLog = playMatch(currentSeason, splitCount);
                 if (matchLog != null) {
                     System.out.println("Match is finished");
+                    GameUIGeneral.createTextFrame("Match is finished", matchLog.toString());
                     System.out.println(matchLog.toString());
                 } else {
                     System.out.println("Season is finished");
                 }
                 break;
-            case "3":
-            case "see team info":
-                System.out.println(teams.get(0).getPlayerRoster().toString());
-                System.out.println(teamToStandingMap.get(teams.get(0)));
+            case 3:
+                //see team info
+                GameUIGeneral.createTextFrame("Team Info and Standings", teamToStandingMap.get(teams.get(0)).toString() + "\n" + teams.get(0).toString());
                 break;
-            case "4":
-            case "see standings":
+            case 4:
+                //see standings
                 Collections.sort(standings);
                 printStandings();
                 break;
-            case "5": 
-                System.out.println(teams.get(0).getPlayers());
+            case 5:
+                //see players
+                GameUIGeneral.createTextFrame("Players", flattenListString(teams.get(0).getPlayers()));
                 break;
-            default:
+            case 6:
+                //sign player
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Design a player to sign");
+                System.out.println("---------------------------");
+                System.out.println("Enter player name: ");
+                String name = scanner.nextLine();
+                System.out.println("Enter player position: ");
+                String positionString = scanner.nextLine();
+                Position position = Position.valueOf(positionString);
+                System.out.println("Enter player OVR: ");
+                int ovr = scanner.nextInt();
+                Player player = Player.generateNamedPlayerFromOVRandPosition(name, ovr, teams.get(0).getTeamID(), position);
+                activePlayers.add(player);
+                teams.get(0).addPlayer(player);
+                scanner.close();
+                break;
+            case 7:
+                //see active players
+                System.out.println(activePlayers);
                 break;
         }
+         
+
     }
 
     static void playGame() throws InterruptedException{
         int splitCount = 0;
+        GameControllerUI gameControllerUI = new GameControllerUI();
         while(gameIsRunning) {
 
             //initialize standings
@@ -119,9 +254,15 @@ public class Game {
 
             Season currentSeason = seasonsToPlay.poll();
             System.out.println(currentSeason.getName() + " " + splitCount);
+        
+            setupActionListeners(gameControllerUI, currentSeason, splitCount);
 
+            System.out.println("1: play season\n2: play game\n3: see team info\n4: see standings\n5: see players\n6: sign player\n7: see active players");
             while (!currentSeason.isFinished()) {
-                awaitPlayerPrompt(splitCount, currentSeason);
+                latch = new CountDownLatch(1);
+                latch_flag=1;
+        
+                latch.await();
             }
 
             Collections.sort(standings);
@@ -189,15 +330,10 @@ public class Game {
         seasonsToPlay.add(new SpringSplit(teams));
     }
 
-    static void playSeason(Season currentSeason, int splitCount) throws InterruptedException {
+    static void playSeason(Season currentSeason, int splitCount) {
 
         int count = 1;
         while (!currentSeason.isFinished()) {
-            for (Team t : teams) {
-                t.getPlayerRoster().normalizePlayers(t.getPlayers());
-            }
-            //pause thread until something comes
-            Thread.sleep(10);
 
             if (count > currentSeason.getOneSetCount()) {
                 count = 1;
@@ -276,7 +412,7 @@ public class Game {
                 activePlayers.add(player);
                 teamMap.get(i).addPlayer(player);
             }
-            teamMap.get(i).getPlayerRoster().normalizePlayers(teamMap.get(i).getPlayers());
+            teamMap.get(i).normalizePlayers();
         }
     }
 

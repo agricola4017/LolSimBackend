@@ -1,6 +1,7 @@
 package GameObjects.TeamsAndPlayers;
 
 import static Functions.Functions.randomNumber0to100;
+import static Functions.Functions.randomNumberCustom;
 
 public class Stat {
 
@@ -46,6 +47,35 @@ public class Stat {
         int potential = randomNumber0to100();
 
         return new Stat(laning, teamfighting, economy, consistency, teamwork, aggression, stamina, potential);
+    }
+
+    public static Stat generateRandomStats(int OVR) {
+        int totalStats = 0;
+        int[] stats = new int[7]; // 7 stats to distribute
+        int min = 20;
+        int max = 80;
+
+        if (randomNumber0to100() < 10) {
+            min = 0;
+            max = 100;
+        }
+
+        // Generate random stats while ensuring they are bounded
+        for (int i = 0; i < stats.length; i++) {
+            stats[i] = randomNumberCustom(min, max);
+            totalStats += stats[i];
+        }
+    
+        // Adjust the stats to match the target OVR
+        int adjustment = OVR - (totalStats / stats.length);
+        for (int i = 0; i < stats.length; i++) {
+            stats[i] += adjustment;
+            // Ensure stats remain within bounds
+            if (stats[i] < 0) stats[i] = 0;
+            if (stats[i] > 100) stats[i] = 100;
+        }
+    
+        return new Stat(stats[0], stats[1], stats[2], stats[3], stats[4], stats[5], stats[6], 50);
     }
 
     public static Stat generatePerfectStat() {

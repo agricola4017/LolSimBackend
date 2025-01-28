@@ -6,10 +6,8 @@ import GameObjects.TeamsAndPlayers.Stat;
 import GameObjects.TeamsAndPlayers.Team;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static Functions.Functions.randomNumberCustom;
 import static Functions.Functions.rollPercentile;
 
 class Match extends MatchAbstract {
@@ -36,7 +34,7 @@ class Match extends MatchAbstract {
     }
 
     int calculateCs(int waveValue) {
-        return (int)Math.round((waveValue/280)*8);
+        return (int)Math.round((waveValue/280.0)*8);
     }
 
     boolean kill(int lan1, int lan2, int agg1, int cons2) {
@@ -152,8 +150,11 @@ class Match extends MatchAbstract {
         }
 
 
-        MatchLogTeamStat team1Stat = new MatchLogTeamStat(team1Kills, team1Deaths, team1Cs, team1Gold, team1PlayerToStatMap);
-        MatchLogTeamStat team2Stat = new MatchLogTeamStat(team2Kills, team2Deaths, team2Cs, team2Gold, team2PlayerToStatMap);
+        Map<Position, Player> team1PositionToPlayerMap = team1.getPlayerRoster().getActivePlayers();
+        Map<Position, Player> team2PositionToPlayerMap = team2.getPlayerRoster().getActivePlayers();
+
+        MatchLogTeamStat team1Stat = new MatchLogTeamStat(team1Kills, team1Deaths, team1Cs, team1Gold, team1PlayerToStatMap, team1PositionToPlayerMap);
+        MatchLogTeamStat team2Stat = new MatchLogTeamStat(team2Kills, team2Deaths, team2Cs, team2Gold, team2PlayerToStatMap, team2PositionToPlayerMap);
 
         //System.out.println(team1Stat);
         //System.out.println(team2Stat);

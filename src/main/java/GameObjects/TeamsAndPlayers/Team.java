@@ -23,6 +23,11 @@ public class Team {
         this.playerRoster = new PlayerRoster(players);
     }
 
+
+    public void normalizePlayers() {
+        this.playerRoster.normalizePlayers(this.players);
+    }
+    
     public List<Player> getPlayers() {
         return players;
     }

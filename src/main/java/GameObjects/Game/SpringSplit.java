@@ -85,6 +85,9 @@ class SpringSplit extends Season {
     @Override
     Match playMatch() {
         Match match = matchesToBePlayed.poll();
+        for (Team team : match.getTeams()) {
+            team.normalizePlayers();
+        }
         match.playMatch();
         return match;
     }

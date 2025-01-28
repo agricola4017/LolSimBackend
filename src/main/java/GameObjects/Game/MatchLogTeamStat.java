@@ -12,13 +12,15 @@ public class MatchLogTeamStat {
     private int cs;
     private int gold;
     private Map<Player, MatchLogPlayerStat> playerToPlayerStatMap;
+    private final Map<Position, Player> positionToPlayerMap;
 
-    public MatchLogTeamStat(int kills, int deaths, int cs, int gold, Map<Player, MatchLogPlayerStat> playerToPlayerStatMap) {
+    public MatchLogTeamStat(int kills, int deaths, int cs, int gold, Map<Player, MatchLogPlayerStat> playerToPlayerStatMap, Map<Position, Player> positionToPlayerMap) {
         this.kills = kills;
         this.deaths = deaths;
         this.cs = cs;
         this.gold = gold;
         this.playerToPlayerStatMap = playerToPlayerStatMap;
+        this.positionToPlayerMap = positionToPlayerMap;
     }
 
     public int getKills() {
@@ -77,6 +79,10 @@ public class MatchLogTeamStat {
         this.deaths+=death;
     }
 
+    public Map<Position, Player> getPositionToPlayerMap() {
+        return positionToPlayerMap;
+    }
+
     /*@Override
     public String toString() {
         return "MatchLogTeamStat{" +
@@ -87,15 +93,14 @@ public class MatchLogTeamStat {
     @Override
     public String toString() {
         String ret = "";
-        int posIter = 0;
-        for (Map.Entry<Player,MatchLogPlayerStat> playerToStat : playerToPlayerStatMap.entrySet()) {
-            Player player = playerToStat.getKey();
-            MatchLogPlayerStat matchLogPlayerStat = playerToStat.getValue();
-            ret += Position.values()[posIter] + " - " + player.getPlayerName() + " | ";
+        for (Map.Entry<Position, Player> positionToPlayer : positionToPlayerMap.entrySet()) {
+            Player player = positionToPlayer.getValue();
+            Position position = positionToPlayer.getKey();
+            MatchLogPlayerStat matchLogPlayerStat = playerToPlayerStatMap.get(player);
+            ret += position + " - " + player.getPlayerName() + " | ";
             ret += "KDA: " + matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths() + " ";
             ret += "CS: " + matchLogPlayerStat.getCs() + " " + "Gold: " + matchLogPlayerStat.getGold();
             ret += "\n";
-            posIter++;
         }
         return ret;
     }

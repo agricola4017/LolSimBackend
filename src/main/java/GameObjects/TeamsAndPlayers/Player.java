@@ -55,6 +55,18 @@ public class Player {
         return new Player(playerID, playerName, teamID, age, position, value, stat, region);
     }
 
+    public static Player generateNamedPlayerFromOVRandPosition(String name, int OVR, int teamID, Position position) {
+        int playerID = counter; //grab latest id
+        String playerName = name;
+        int age = 17;
+        float value = 65.00f;
+        Stat stat = Stat.generateRandomStats(OVR);
+        Region region = Region.generateRandomRegion();
+        counter++;
+
+        return new Player(playerID, playerName, teamID, age, position, value, stat, region);
+    }
+
     public static Player generatePlayerWithTeam(int teamId) {
         int playerID = counter; //grab latest id
         String playerName = "test" + playerID; //generate name
