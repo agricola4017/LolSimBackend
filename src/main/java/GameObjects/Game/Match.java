@@ -54,7 +54,7 @@ class Match extends MatchAbstract {
         Map<Position, Player> team1playersMap = team1.getPlayerRoster().getActivePlayers();
         Map<Position, Player> team2playersMap = team2.getPlayerRoster().getActivePlayers();
 
-        System.out.println(team1.getPlayerRoster().getActivePlayers());
+        //System.out.println(team1.getPlayerRoster().getActivePlayers());
         Map<Player, MatchLogPlayerStat> team1PlayerToStatMap = new HashMap<>();
         Map<Player, MatchLogPlayerStat> team2PlayerToStatMap = new HashMap<>();
 
