@@ -5,14 +5,14 @@ import java.util.*;
 public class PlayerRoster {
 
     //restrict to one roster per team
-    private Map<Position,Player> activePlayers;
+    private EnumMap<Position,Player> activePlayers;
 
     public PlayerRoster() {
-        this.activePlayers = new HashMap<>();
+        this.activePlayers = new EnumMap<>(Position.class);
     }
 
     public PlayerRoster(List<Player> players) {
-        this.activePlayers = new HashMap<>();
+        this.activePlayers = new EnumMap<>(Position.class);
 
         normalizePlayers(players);
 
@@ -71,7 +71,7 @@ public class PlayerRoster {
     public List<Player> getRosterAsList() {
         return new ArrayList<>(activePlayers.values());
     }
-    public void setActivePlayers(Map<Position,Player> activePlayers) {
+    public void setActivePlayers(EnumMap<Position,Player> activePlayers) {
         this.activePlayers = activePlayers;
     }
 

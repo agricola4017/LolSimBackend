@@ -2,6 +2,8 @@ package GameObjects.TeamsAndPlayers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Team {
     private int teamID;
@@ -23,11 +25,10 @@ public class Team {
         this.playerRoster = new PlayerRoster(players);
     }
 
-
     public void normalizePlayers() {
         this.playerRoster.normalizePlayers(this.players);
     }
-    
+
     public List<Player> getPlayers() {
         return players;
     }
@@ -71,11 +72,25 @@ public class Team {
 
     @Override
     public String toString() {
-        return "Team{" +
+        String ret = "";
+
+        ret += "Team{" +
                 "teamID=" + teamID +
                 ", teamName='" + teamName + '\'' +
                 //", players=" + players +
                 ", playerRoster=" + playerRoster +
                 '}';
+
+        Set<Player> parsedPlayers = new HashSet<>(playerRoster.getActivePlayers().values());
+
+        for (Player p : players) {
+            if (parsedPlayers.contains(p)) {
+                continue;
+            } else {
+                ret += p + "\n";
+                parsedPlayers.add(p);
+            }
+        }
+        return ret;
     }
 }
