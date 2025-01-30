@@ -163,6 +163,19 @@ class Match extends MatchAbstract {
         teamToTeamStatMap.put(team1, team1Stat);
         teamToTeamStatMap.put(team2, team2Stat);
 
+        //player season stat management
+        for (Map.Entry<Player, MatchLogPlayerStat> entry : team1PlayerToStatMap.entrySet()) {
+            Player player = entry.getKey();
+            MatchLogPlayerStat playerStat = entry.getValue();
+            player.updateSeasonStats(playerStat.getKills(), playerStat.getDeaths(), playerStat.getCs(), playerStat.getGold());
+        }
+
+        for (Map.Entry<Player, MatchLogPlayerStat> entry : team2PlayerToStatMap.entrySet()) {
+            Player player = entry.getKey();
+            MatchLogPlayerStat playerStat = entry.getValue();
+            player.updateSeasonStats(playerStat.getKills(), playerStat.getDeaths(), playerStat.getCs(), playerStat.getGold());
+        }
+
         MatchLogStats matchLogStats = new MatchLogStats(teamToTeamStatMap);
         matchLog = new MatchLog(winner, loser, matchLogStats);
     }

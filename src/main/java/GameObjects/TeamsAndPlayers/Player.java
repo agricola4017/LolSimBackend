@@ -14,6 +14,12 @@ public class Player {
     //test val
     public static int counter = 0;
 
+    int kills = 0;
+    int deaths = 0;
+    int cs = 0;
+    int gold = 0;
+    int gamesPlayed = 0;
+
     //generate random player
     public Player() {
         this.playerID = counter; //grab latest id
@@ -26,6 +32,7 @@ public class Player {
         this.region = Region.NA; //randomize
         this.OVR = stat.getOVR();
         counter++;
+        
     }
 
     public Player(int playerID, String playerName, int teamID, int age, Position position, float value, Stat stat, Region region) {
@@ -92,6 +99,38 @@ public class Player {
 
         return new Player(playerID, playerName, teamId, age, position, value, stat, region);
     }
+
+    public void updateSeasonStats(int kills, int deaths, int cs, int gold) {
+        this.kills += kills;
+        this.deaths += deaths;
+        this.cs += cs;
+        this.gold += gold;
+        gamesPlayed++;
+    }
+
+    public void resetSeasonStats() {
+        this.kills = 0;
+        this.deaths = 0;
+        this.cs = 0;
+        this.gold = 0;
+        gamesPlayed = 0;
+    }
+
+    public int[] getSeasonStats() {
+        if (gamesPlayed == 0) 
+            return new int[] {0, 0, 0, 0};
+        else 
+            return new int[] {this.kills/gamesPlayed, this.deaths/gamesPlayed, this.cs/gamesPlayed, this.gold/gamesPlayed};
+    }
+
+    public void increaseStats() {
+        this.stat.increaseStats();
+    }
+
+    public void decreaseStats() { 
+        this.stat.decreaseStats(); 
+    } //decreaseStats
+
     public int getPlayerID() {
         return playerID;
     }
@@ -158,14 +197,20 @@ public class Player {
 
     @Override
     public String toString() {
-        return "" +//"playerID=" + playerID +
-                "playerName='" + playerName + '\'' +
+        int gp = gamesPlayed;
+        if (gamesPlayed == 0) { 
+            gp = 1;
+        }
+        return "playerID=" + playerID +  
+                ", playerName='" + playerName + '\'' +
+                ", age=" + age +
                 //", teamID=" + teamID +
-                //", age=" + age +
                 ", position=" + position +
                 //", value=" + value +
                 //", stat=" + stat +
                 //", region=" + region +
-                ", OVR= " + stat.getOVR();
+                ", OVR= " + stat.getOVR() + 
+                ", KDA=" + kills/gp + "/" + deaths/gp +
+                ", CS=" + cs/gp + " " + ",Gold=" + gold/gp;
     }
 }

@@ -11,12 +11,14 @@ public class GameControllerUI {
     private JButton seeStandingsButton;
     private JButton seePlayersButton;
     private JButton signPlayerButton;
+    private JButton playTeamGameButton;
+    private JButton findPlayerButton;
 
     public GameControllerUI() {
         // Create the frame
         JFrame frame = new JFrame("Game Options");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
+        frame.setSize(500, 300);
         frame.setLayout(new FlowLayout());
 
         // Create buttons for each option
@@ -26,6 +28,8 @@ public class GameControllerUI {
         seeStandingsButton = new JButton("See Standings");
         seePlayersButton = new JButton("See Players");
         signPlayerButton = new JButton("Sign Player");
+        playTeamGameButton = new JButton("Play Team Game");
+        findPlayerButton = new JButton("Find Player");
         // Add buttons to the frame
         frame.add(playSeasonButton);
         frame.add(playGameButton);
@@ -33,6 +37,8 @@ public class GameControllerUI {
         frame.add(seeStandingsButton);
         frame.add(seePlayersButton);
         frame.add(signPlayerButton);
+        frame.add(playTeamGameButton);
+        frame.add(findPlayerButton);
 
         // Set frame visibility
         frame.setVisible(true);
@@ -60,5 +66,13 @@ public class GameControllerUI {
     
     public JButton getSignPlayerButton() {
         return signPlayerButton;
+    }
+
+    public JButton getPlayTeamGameButton() {
+        return playTeamGameButton;
+    }
+
+    public JButton getFindPlayerButton() {
+        return findPlayerButton;
     }
 }

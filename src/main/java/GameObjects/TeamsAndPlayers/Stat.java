@@ -90,6 +90,28 @@ public class Stat {
 
         return new Stat(laning, teamfighting, economy, consistency, teamwork, aggression, stamina, potential);
     }
+
+    public void increaseStats() {
+        this.laning += randomNumberCustom(1,3);
+        this.teamfighting += randomNumberCustom(1,3);
+        this.economy += randomNumberCustom(1,3);
+        this.consistency += randomNumberCustom(1,3);
+        this.teamwork += randomNumberCustom(1,3);
+        this.aggression += randomNumberCustom(1,3);
+        this.stamina += randomNumberCustom(1,3);
+        this.potential += 3;
+    }
+
+    public void decreaseStats() {
+        this.laning -= randomNumberCustom(1,3);
+        this.teamfighting -= randomNumberCustom(1,3);
+        this.economy -= randomNumberCustom(1,3);
+        this.consistency -= randomNumberCustom(1,3);
+        this.teamwork -= randomNumberCustom(1,3);
+        this.aggression -= randomNumberCustom(1,3);
+        this.stamina -= randomNumberCustom(1,3);
+        this.potential -= 3;
+    }
     public int getLaning() {
         return laning;
     }

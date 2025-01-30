@@ -11,11 +11,19 @@ public class Team {
     private List<Player> players;
     private PlayerRoster playerRoster;
 
+    private int wins;
+    private int standing;
+    private int avgPlacement;
+
     public Team(int teamID, String teamName) {
         this.teamID = teamID;
         this.teamName = teamName;
         this.players = new ArrayList<>();
         this.playerRoster = new PlayerRoster();
+
+        this.wins=0;
+        this.standing=0;
+        this.avgPlacement=0;
     }
 
     public Team(int teamID, String teamName, List<Player> players) {
@@ -23,6 +31,14 @@ public class Team {
         this.teamName = teamName;
         this.players = players;
         this.playerRoster = new PlayerRoster(players);
+
+        this.wins=0;
+        this.standing=0;
+        this.avgPlacement=0;
+    }
+
+    public void addPlacement(int placement, int seasonsPlayed) {
+        this.avgPlacement = (this.avgPlacement * (seasonsPlayed - 1) + placement) / seasonsPlayed;
     }
 
     public void normalizePlayers() {
@@ -70,15 +86,25 @@ public class Team {
         this.playerRoster = playerRoster;
     }
 
+    public int addWin() {
+        this.wins += 1;
+        return this.wins;
+    }
+
+    public void setStanding(int pos) {
+        this.standing = pos;
+    }
+
     @Override
     public String toString() {
         String ret = "";
 
-        ret += "Team{" +
-                "teamID=" + teamID +
-                ", teamName='" + teamName + '\'' +
+        ret += "Team Name=" + teamName + "\n" +
+                "Wins=" + wins + "\n" +
+                "Average Placement=" + avgPlacement + "\n" +
+                "OVR=" + playerRoster.getOVR() + "\n" +
                 //", players=" + players +
-                ", playerRoster=" + playerRoster +
+                "Roster=" + playerRoster +
                 '}';
 
         Set<Player> parsedPlayers = new HashSet<>(playerRoster.getActivePlayers().values());

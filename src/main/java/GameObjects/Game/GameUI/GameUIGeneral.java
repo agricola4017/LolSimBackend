@@ -16,9 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import GameObjects.Game.Game;
+import GameObjects.Game.Callbacks.PlayerFormCallback;
+import GameObjects.Game.Callbacks.IDFormCallback;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Position;
-import GameObjects.Game.PlayerFormCallback;
 
 import java.awt.Font;
 import java.awt.FlowLayout;
@@ -35,7 +36,7 @@ public class GameUIGeneral {
             // Create new frame if it doesn't exist
             frame = new JFrame(title);
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setSize(600, 600);
+            frame.setSize(900, 600);
             frame.setLayout(new FlowLayout());
 
             // Create new label
@@ -57,7 +58,7 @@ public class GameUIGeneral {
         messageLabel.setText("<html>" + message.replace("\n", "<br>") + "</html>");
         
         // Update font size
-        int newFontSize = Math.max(12, frame.getWidth() / 30);
+        int newFontSize = Math.max(12, frame.getWidth() / 50);
         messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
 
         // Show frame if not visible
@@ -115,11 +116,72 @@ public class GameUIGeneral {
         frame.setVisible(true);
     }
 
+    public static void createFindByIDForm(String identifier, String title, IDFormCallback callback) {
+        JFrame frame = new JFrame(title);
+        activeFrames.put(identifier, frame);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(300, 200);
+        frame.setLayout(new FlowLayout());
+
+        JLabel idLabel = new JLabel(identifier);
+        JTextField idField = new JTextField();
+        idField.setColumns(10);
+
+
+        frame.add(idLabel);
+        frame.add(idField);
+
+        JButton submitButton = new JButton("Find");
+        frame.add(submitButton);
+
+        submitButton.addActionListener(e -> {
+            String id = idField.getText();
+            int ID = Integer.parseInt(id);
+            callback.onIDSubmit(ID);
+
+        });
+
+        frame.setVisible(true);
+    }
+    
+    public static void updateIDForm(String frameId, String message) {
+        JFrame frame = activeFrames.get(frameId);
+        JLabel messageLabel;
+
+        if (frame==null) {
+            System.out.println("Frame not found: " + frameId);
+            return;
+        }
+
+
+        frame.setSize(600,200);
+        if (activeLabels.containsKey(frameId)) { 
+            messageLabel = activeLabels.get(frameId);
+
+        } else {
+            messageLabel = new JLabel();
+            activeLabels.put(frameId, messageLabel);
+        }
+        messageLabel.setText("<html>" + message.replace("\n", "<br>") + "</html>");
+        
+        // Update font size
+        int newFontSize = Math.max(12, frame.getWidth() / 50);
+        messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
+        frame.add(messageLabel);
+
+        if (!frame.isVisible()) {
+            frame.setVisible(true);
+        }
+
+        // Revalidate and repaint
+        frame.revalidate();
+        frame.repaint();
+    }
+
     // Method to check if a frame exists
     public static boolean hasFrame(String frameId) {
         return activeFrames.containsKey(frameId);
     }
-
     // Method to dispose a frame
     public static void disposeFrame(String frameId) {
         JFrame frame = activeFrames.remove(frameId);
