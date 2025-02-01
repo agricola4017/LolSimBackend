@@ -1,9 +1,11 @@
 package GameObjects.TeamsAndPlayers;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Arrays;
 
 public class Team {
     private int teamID;
@@ -24,6 +26,7 @@ public class Team {
         this.wins=0;
         this.standing=0;
         this.avgPlacement=0;
+        
     }
 
     public Team(int teamID, String teamName, List<Player> players) {

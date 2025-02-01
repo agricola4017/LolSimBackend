@@ -24,7 +24,7 @@ import GameObjects.TeamsAndPlayers.Position;
 import java.awt.Font;
 import java.awt.FlowLayout;
 
-public class GameUIGeneral {
+public class GameUIGenerator {
     private static Map<String, JFrame> activeFrames = new HashMap<>();
     private static Map<String, JLabel> activeLabels = new HashMap<>();
 

@@ -24,7 +24,7 @@ public class Player {
     public Player() {
         this.playerID = counter; //grab latest id
         this.playerName = "test" + this.playerID; //generate name
-        this.teamID = 0;
+        this.teamID = -1;
         this.age = 17;
         this.position = Position.top; //randomize
         this.value = 165.55f;
@@ -51,7 +51,7 @@ public class Player {
     public static Player generatePlayer() {
         int playerID = counter; //grab latest id
         String playerName = "test" + playerID; //generate name
-        int teamID = 0;
+        int teamID = -1;
         int age = 17;
         Position position = Position.generateRandomPosition();
         float value = 65.00f;
@@ -195,6 +195,10 @@ public class Player {
         this.region = region;
     }
 
+    public int getOVR() {
+        return stat.getOVR();
+    }
+
     @Override
     public String toString() {
         int gp = gamesPlayed;
@@ -204,7 +208,7 @@ public class Player {
         return "playerID=" + playerID +  
                 ", playerName='" + playerName + '\'' +
                 ", age=" + age +
-                //", teamID=" + teamID +
+                ", teamID=" + teamID +
                 ", position=" + position +
                 //", value=" + value +
                 //", stat=" + stat +

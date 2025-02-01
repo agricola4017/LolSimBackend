@@ -59,11 +59,11 @@ class Match extends MatchAbstract {
         Map<Player, MatchLogPlayerStat> team2PlayerToStatMap = new HashMap<>();
 
         for (Player p: team1.getPlayerRoster().getRosterAsList()) {
-            team1PlayerToStatMap.put(p,new MatchLogPlayerStat(0, 0, 0, 0));
+            team1PlayerToStatMap.put(p,new MatchLogPlayerStat(p, 0, 0, 0, 0));
         }
 
         for (Player p: team2.getPlayerRoster().getRosterAsList()) {
-            team2PlayerToStatMap.put(p,new MatchLogPlayerStat(0, 0, 0, 0));
+            team2PlayerToStatMap.put(p,new MatchLogPlayerStat(p, 0, 0, 0, 0));
         }
 
         //lane phase
@@ -153,8 +153,8 @@ class Match extends MatchAbstract {
         Map<Position, Player> team1PositionToPlayerMap = team1.getPlayerRoster().getActivePlayers();
         Map<Position, Player> team2PositionToPlayerMap = team2.getPlayerRoster().getActivePlayers();
 
-        MatchLogTeamStat team1Stat = new MatchLogTeamStat(team1Kills, team1Deaths, team1Cs, team1Gold, team1PlayerToStatMap, team1PositionToPlayerMap);
-        MatchLogTeamStat team2Stat = new MatchLogTeamStat(team2Kills, team2Deaths, team2Cs, team2Gold, team2PlayerToStatMap, team2PositionToPlayerMap);
+        MatchLogTeamStat team1Stat = new MatchLogTeamStat(team1, team1Kills, team1Deaths, team1Cs, team1Gold, team1PlayerToStatMap, team1PositionToPlayerMap);
+        MatchLogTeamStat team2Stat = new MatchLogTeamStat(team2, team2Kills, team2Deaths, team2Cs, team2Gold, team2PlayerToStatMap, team2PositionToPlayerMap);
 
         //System.out.println(team1Stat);
         //System.out.println(team2Stat);

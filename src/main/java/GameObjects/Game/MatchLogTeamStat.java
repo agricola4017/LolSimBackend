@@ -11,10 +11,12 @@ public class MatchLogTeamStat {
     private int deaths;
     private int cs;
     private int gold;
+    private Team team;
     private Map<Player, MatchLogPlayerStat> playerToPlayerStatMap;
     private final Map<Position, Player> positionToPlayerMap;
 
-    public MatchLogTeamStat(int kills, int deaths, int cs, int gold, Map<Player, MatchLogPlayerStat> playerToPlayerStatMap, Map<Position, Player> positionToPlayerMap) {
+    public MatchLogTeamStat(Team team, int kills, int deaths, int cs, int gold, Map<Player, MatchLogPlayerStat> playerToPlayerStatMap, Map<Position, Player> positionToPlayerMap) {
+        this.team = team;
         this.kills = kills;
         this.deaths = deaths;
         this.cs = cs;
@@ -93,6 +95,8 @@ public class MatchLogTeamStat {
     @Override
     public String toString() {
         String ret = "";
+        
+        ret += team.getTeamName() + "\n";
         for (Map.Entry<Position, Player> positionToPlayer : positionToPlayerMap.entrySet()) {
             Player player = positionToPlayer.getValue();
             Position position = positionToPlayer.getKey();
@@ -100,6 +104,7 @@ public class MatchLogTeamStat {
             ret += position + " - " + player.getPlayerName() + " | ";
             ret += "KDA: " + matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths() + " ";
             ret += "CS: " + matchLogPlayerStat.getCs() + " " + "Gold: " + matchLogPlayerStat.getGold();
+            ret += " | OVR: " + player.getStat().getOVR();
             ret += "\n";
         }
         return ret;

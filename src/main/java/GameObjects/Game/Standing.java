@@ -1,6 +1,10 @@
 package GameObjects.Game;
 
+import java.util.List;
+
 import GameObjects.TeamsAndPlayers.Team;
+import java.util.LinkedList;
+import java.util.Arrays;
 
 public class Standing implements Comparable<Standing> {
 
@@ -8,10 +12,15 @@ public class Standing implements Comparable<Standing> {
     private int losses;
     private Team team;
 
+    private List<Boolean> last5;
+        
+
     public Standing(Team team) {
         this.wins = 0;
         this.losses = 0;
         this.team = team;
+
+        this.last5 = new LinkedList<Boolean>();
     }
 
     @Override
@@ -36,10 +45,18 @@ public class Standing implements Comparable<Standing> {
     }
 
     public void wonGame() {
+        if (this.last5.size() == 5) {
+            this.last5.remove(0);   
+        }
+        this.last5.add(true);
         this.wins++;
     }
 
     public void lostGame() {
+        if (this.last5.size() == 5) {
+            this.last5.remove(0);
+        }   
+        this.last5.add(false);
         this.losses++;
     }
     public int getLosses() {
@@ -56,6 +73,13 @@ public class Standing implements Comparable<Standing> {
 
     @Override
     public String toString() {
-        return team.getTeamName() + ": " + wins + "-" + (losses) + " | " +(wins+losses);
+        int last5Wins = 0;
+        for (Boolean b : last5) {
+            if (b) {
+                last5Wins++;
+            }
+        }
+        return team.getTeamName() + ": " + wins + "-" + (losses) + " | " +(wins+losses) 
+        + "| Last 5: " + last5Wins + "-" + (last5.size() - last5Wins);
     }
 }

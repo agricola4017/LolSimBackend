@@ -7,12 +7,14 @@ public class MatchLogPlayerStat {
     private int deaths;
     private int cs;
     private int gold;
+    private Player player;
 
-    public MatchLogPlayerStat(int kills, int deaths, int cs, int gold) {
+    public MatchLogPlayerStat(Player player, int kills, int deaths, int cs, int gold) {
         this.kills = kills;
         this.deaths = deaths;
         this.cs = cs;
         this.gold = gold;
+        this.player = player;
     }
 
     public int getKills() {
@@ -66,7 +68,8 @@ public class MatchLogPlayerStat {
     @Override
     public String toString() {
         return "MatchLogPlayerStat{" +
-                "kills=" + kills +
+                "player=" + player +
+                ", kills=" + kills +
                 ", deaths=" + deaths +
                 ", cs=" + cs +
                 ", gold=" + gold +

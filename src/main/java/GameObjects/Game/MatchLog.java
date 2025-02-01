@@ -40,8 +40,8 @@ public class MatchLog {
 
     @Override
     public String toString() {
-        return winner.getTeamName() + "(W) - " + winner.getPlayerRoster().getOVR() +
-                "\n" + loser.getTeamName() + "(L) - " + loser.getPlayerRoster().getOVR() +
+        return winner.getTeamName() + "(W) - " +  "OVR: " + winner.getPlayerRoster().getOVR() +
+                "\n" + loser.getTeamName() + "(L) - " + "OVR: " + loser.getPlayerRoster().getOVR() +
                 "\n" + matchLogStats;
     }
 }
