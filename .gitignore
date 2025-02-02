@@ -34,3 +34,4 @@ pom.xml
 SimulationGameBackend.iml
 .idea
 game.save
+.aider*
