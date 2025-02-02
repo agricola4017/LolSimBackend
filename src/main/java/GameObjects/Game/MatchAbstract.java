@@ -1,8 +1,9 @@
 package GameObjects.Game;
 
 import GameObjects.TeamsAndPlayers.Team;
+import java.io.Serializable;
 
-abstract class MatchAbstract {
+abstract class MatchAbstract implements Serializable {
     private Team[] teams;
     private int matches;
     private MatchLog matchLog;

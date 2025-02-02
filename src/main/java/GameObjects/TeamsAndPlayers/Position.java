@@ -1,9 +1,8 @@
 package GameObjects.TeamsAndPlayers;
 
-
 import static Functions.Functions.randomNumberCustom;
 
-public enum Position {
+public enum Position{
     top,
     jgl,
     mid,

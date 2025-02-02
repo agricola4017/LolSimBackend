@@ -3,7 +3,9 @@ package GameObjects.TeamsAndPlayers;
 import static Functions.Functions.randomNumber0to100;
 import static Functions.Functions.randomNumberCustom;
 
-public class Stat {
+import java.io.Serializable;
+
+public class Stat implements Serializable{
 
     private int laning;
     private int teamfighting;

@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.io.Serializable;
 
-public class Team {
+public class Team implements Serializable { 
     private int teamID;
     private String teamName;
     private List<Player> players;

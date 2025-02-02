@@ -15,10 +15,13 @@ import GameObjects.Game.GameUI.GameUIGenerator;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import java.io.*;
+
 public class Game {
 
     //not implemented yet what to decide game is not running anymore 
     private boolean gameIsRunning;
+
     private Queue<Season> seasonsToPlay = new LinkedList<>();
 
     //game state objects that represent current game 
@@ -68,6 +71,22 @@ public class Game {
         this.teamToStandingMap = new HashMap<>();
     }
 
+    public void loadGame(boolean gameIsRunning, Queue<Season> seasonsToPlay, List<Team> teams, List<Player> activePlayers, 
+                         Map<Integer, Team> teamIDtoTeamMap, Map<Integer, Player> playerIDtoPlayerMap, List<Standing> standings, List<Standing> oldStandings, 
+                         Map<Team, Standing> teamToStandingMap, Team playingTeam) throws IOException { 
+
+        this.gameIsRunning = gameIsRunning;
+        this.seasonsToPlay = seasonsToPlay;
+        this.teams = teams;
+        this.activePlayers = activePlayers;
+        this.teamIDtoTeamMap = teamIDtoTeamMap;
+        this.playerIDtoPlayerMap = playerIDtoPlayerMap;
+        this.standings = standings;
+        this.oldStandings = oldStandings;
+        this.teamToStandingMap = teamToStandingMap;
+        this.playingTeam = playingTeam;
+    }
+
     //getters and setters
 
     List<Player> getPlayers() {
@@ -102,6 +121,29 @@ public class Game {
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
     }
 
+    Queue<Season> getSeasonsToPlay() {
+        return seasonsToPlay;
+    }
+
+    CountDownLatch getLatch() {
+        return latch;
+    }
+
+    Team getPlayingTeam() {
+        return playingTeam;
+    }
+
+    void countDownLatch() {
+        latch.countDown();
+    }
+
+    List<Standing> getOldStandings() {
+        return oldStandings;
+    }
+
+    boolean getGameIsRunning() {
+        return gameIsRunning;
+    }
     /**
      * After game data has been loaded or initialized, this method is called to start the first season of the game.
      * It should be expected that in future development, there will be more types of seasons and progressions.
@@ -122,10 +164,10 @@ public class Game {
      */
     void playGame() throws InterruptedException{
         int splitCount = 1;
-        GameControllerUI gameControllerUI = new GameControllerUI();
+       // GameControllerUI gameControllerUI = new GameControllerUI();
         
         while(gameIsRunning) {
-            prepareNewSeason(gameControllerUI, splitCount);
+            prepareNewSeason(splitCount);
 
             latch.await();
 
@@ -140,17 +182,16 @@ public class Game {
     /**
      * prepares a new season to be played
      * * initializes the standings, clears action listeners, and grabs current season
-     * @param gameControllerUI
      * @param splitCount
      */
-    void prepareNewSeason(GameControllerUI gameControllerUI, int splitCount) {
+    void prepareNewSeason(int splitCount) {
         initStandings();
-        Season currentSeason = seasonsToPlay.poll();
+        Season currentSeason = seasonsToPlay.peek();
         System.out.println(currentSeason.getName() + " " + splitCount);
 
         latch = new CountDownLatch(1);
 
-        setupActionListeners(gameControllerUI, currentSeason, splitCount);
+        //setupActionListeners(gameControllerUI, currentSeason);
         //maybe pass these vars to controller 
     }
 
@@ -172,7 +213,8 @@ public class Game {
         seasonsToPlay.add(new SpringSplit(teams));
         adjustPlayerStats();
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
-        cleanActionListeners();
+        seasonsToPlay.poll();
+        //cleanActionListeners();
     }
 
     /**
@@ -190,9 +232,8 @@ public class Game {
      * this should likely be its own class
      * @param gameControllerUI
      * @param currentSeason
-     * @param splitCount
      */ 
-    void setupActionListeners(GameControllerUI gameControllerUI, Season currentSeason, int splitCount) {
+    void setupActionListeners(GameControllerUI gameControllerUI, Season currentSeason) {
         JButton playSeasonButton = gameControllerUI.getPlaySeasonButton();
         JButton playGameButton = gameControllerUI.getPlayGameButton();
         JButton seeStandingsButton = gameControllerUI.getSeeStandingsButton();
@@ -204,10 +245,13 @@ public class Game {
         JButton seePlayersButton = gameControllerUI.getSeePlayersButton();
         JButton findTeamButton = gameControllerUI.getFindTeamButton();
 
+        JButton saveGameButton = gameControllerUI.getSaveGameButton();
+        JButton loadGameButton = gameControllerUI.getLoadGameButton();
+
         ActionListener playSeasonListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MatchLog matchLog = playSeason(currentSeason, splitCount);
+                MatchLog matchLog = playSeason(currentSeason);
                 
                 GameUIGenerator.createOrUpdateTextFrame("standings", "Standings", standingsToString());
                 String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
@@ -230,7 +274,7 @@ public class Game {
         ActionListener playGameListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {    
-                MatchLog matchLog = playMatch(currentSeason, splitCount);
+                MatchLog matchLog = playMatch(currentSeason);
                 if (matchLog != null) {
                     GameUIGenerator.createOrUpdateTextFrame("matchLog", "Match Log", matchLog.toString());
                     // Also update standings after each game
@@ -259,7 +303,7 @@ public class Game {
             public void actionPerformed(ActionEvent e) {
                 MatchLog matchLog;
                 do {
-                    matchLog = playMatch(currentSeason, splitCount);
+                    matchLog = playMatch(currentSeason);
                 } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
                 
                 if (matchLog != null) {
@@ -388,6 +432,50 @@ public class Game {
         };
         findTeamButton.addActionListener(findTeamListener);
         buttonToActionListenerMap.put(findTeamButton, findTeamListener);
+
+        ActionListener saveGameListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Save the game
+                try (FileOutputStream fos = new FileOutputStream("game.save");
+                ObjectOutputStream oos = new ObjectOutputStream(fos);) {
+                    oos.writeObject(teams);
+                    oos.writeObject(activePlayers);
+                    oos.writeObject(teamIDtoTeamMap);
+                    oos.writeObject(playerIDtoPlayerMap);
+                    oos.writeObject(standings);
+                    oos.writeObject(teamToStandingMap);
+                    oos.writeObject(oldStandings);
+                } catch (IOException ex) {
+                    System.out.println("Error saving game");
+                }
+            }
+        };
+
+        saveGameButton.addActionListener(saveGameListener);
+        buttonToActionListenerMap.put(saveGameButton, saveGameListener);
+
+        ActionListener loadGameListener = new ActionListener() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public void actionPerformed(ActionEvent e) {
+                // Load the game
+                try (FileInputStream fis = new FileInputStream("game.save");
+                     ObjectInputStream ois = new ObjectInputStream(fis);) {
+                    teams = (List<Team>) ois.readObject();
+                    activePlayers = (List<Player>) ois.readObject();
+                    teamIDtoTeamMap = (Map<Integer, Team>) ois.readObject();
+                    playerIDtoPlayerMap = (Map<Integer, Player>) ois.readObject();
+                    standings = (List<Standing>) ois.readObject();
+                    teamToStandingMap = (Map<Team, Standing>) ois.readObject();
+                    oldStandings = (List<Standing>) ois.readObject();
+                } catch (IOException | ClassNotFoundException ex) {
+                    System.out.println("Error loading game: " + ex.getMessage());
+                } 
+            }
+        };
+        loadGameButton.addActionListener(loadGameListener);
+        buttonToActionListenerMap.put(loadGameButton, loadGameListener);
     }
 
     /**
@@ -457,10 +545,9 @@ public class Game {
     /**
      * Plays the current season and returns the match log
      * @param currentSeason: the season to play
-     * @param splitCount: the split count of the season
      * @return the match log of the season
      */
-    MatchLog playSeason(Season currentSeason, int splitCount) {
+    MatchLog playSeason(Season currentSeason) {
         MatchLog matchLog = null;
         int count = 1;
         //this validation should be moved to the controller 
@@ -471,7 +558,7 @@ public class Game {
                 //balance teams
                 Collections.sort(standings);
             } else {
-                matchLog = playMatch(currentSeason, splitCount);
+                matchLog = playMatch(currentSeason);
                 count++;
             }
         }
@@ -481,10 +568,9 @@ public class Game {
     /**
      * Plays a match and returns the match log
      * @param currentSeason: the season to play the match from
-     * @param splitCount: the split count of the season
      * @return the match log of the match
      */
-    MatchLog playMatch(Season currentSeason, int splitCount) {
+    MatchLog playMatch(Season currentSeason) {
         //validation should be moved to the controller 
         if (!currentSeason.isFinished()) {
             Match match = currentSeason.playMatch();

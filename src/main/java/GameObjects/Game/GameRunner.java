@@ -1,5 +1,6 @@
 package GameObjects.Game;
 
+import GameObjects.Game.GameUI.GameControllerUI;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
 
@@ -18,6 +19,9 @@ public class GameRunner {
 
         //this following line depends on team id 0 existing
         Game game = new Game(teamIDtoTeamMap, playerIDtoPlayerMap, teamIDtoTeamMap.get(0));
+        GameControllerUI gameControllerUI = new GameControllerUI();
+        UIGameService ui = new UIGameService(game, gameControllerUI);
+        ui.setupActionListeners();
         game.selectTeam(teamIDtoTeamMap.get(0));
 
         game.loadGameWithSeasonsConfig();

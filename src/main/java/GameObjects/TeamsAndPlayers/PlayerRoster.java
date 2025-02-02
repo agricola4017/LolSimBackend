@@ -1,8 +1,9 @@
 package GameObjects.TeamsAndPlayers;
 
 import java.util.*;
+import java.io.Serializable;
 
-public class PlayerRoster {
+public class PlayerRoster implements Serializable {
 
     //restrict to one roster per team
     private EnumMap<Position,Player> activePlayers;

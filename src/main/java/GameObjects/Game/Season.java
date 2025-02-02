@@ -2,10 +2,11 @@ package GameObjects.Game;
 
 import GameObjects.TeamsAndPlayers.Team;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Queue;
 
-public abstract class Season {
+public abstract class Season implements Serializable{ 
     
     // free agent
     /**

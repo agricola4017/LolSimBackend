@@ -14,6 +14,8 @@ public class GameControllerUI {
     private JButton playTeamGameButton;
     private JButton findPlayerButton;
     private JButton findTeamButton;
+    private JButton saveGameButton;
+    private JButton loadGameButton;
 
     public GameControllerUI() {
         // Create the frame
@@ -32,6 +34,8 @@ public class GameControllerUI {
         playTeamGameButton = new JButton("Play Team Game");
         findPlayerButton = new JButton("Find Player");
         findTeamButton = new JButton("Find Team");
+        saveGameButton = new JButton("Save Game");
+        loadGameButton = new JButton("Load Game");
         // Add buttons to the frame
         frame.add(playSeasonButton);
         frame.add(playGameButton);
@@ -42,6 +46,8 @@ public class GameControllerUI {
         frame.add(playTeamGameButton);
         frame.add(findPlayerButton);
         frame.add(findTeamButton);
+        frame.add(saveGameButton);
+        frame.add(loadGameButton);
 
         // Set frame visibility
         frame.setVisible(true);
@@ -81,5 +87,13 @@ public class GameControllerUI {
 
     public JButton getFindTeamButton() {
         return findTeamButton;
+    }
+
+    public JButton getSaveGameButton() {
+        return saveGameButton;
+    }
+
+    public JButton getLoadGameButton() {
+        return loadGameButton;
     }
 }
