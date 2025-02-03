@@ -173,7 +173,7 @@ public class GameUIGenerator {
         
         // Update font size
         int newFontSize = Math.max(12, frame.getWidth() / 50);
-        messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
+        //messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
         frame.add(messageLabel);
 
         if (!frame.isVisible()) {
