@@ -1,34 +1,29 @@
-package GameObjects.Game;
+package GameObjects.Game.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-class SpringPlayoffs extends Season {
+
+public class SpringSplit extends Season {
     private Queue<Match> matchesToBePlayed;
     private int oneSetCount;
 
-    private final static String name = "Spring Playoffs";
+    private final static String name = "Spring Split";
 
     /**
      * TODO: consider moving all this organization to a 'start' method
      * outputs - matchesToBePlayed : schedule
      * @param teams
      */
-
-    SpringPlayoffs() {
-
-    }
-
-    SpringPlayoffs(List<Team> teams) {
+    public SpringSplit(List<Team> teams) {
         this.oneSetCount = teams.size()/2;
         this.matchesToBePlayed = new LinkedList<>();
 
         /**
-         * 1st vs last, 2nd vs next last
+         * rotating algorithm for round robin
          */
 
         //assume teams is even and > 2, if odd incorporate bye (But skip for now)
@@ -88,8 +83,11 @@ class SpringPlayoffs extends Season {
     }
 
     @Override
-    Match playMatch() {
+    public Match playMatch() {
         Match match = matchesToBePlayed.poll();
+        for (Team team : match.getTeams()) {
+            team.normalizePlayers();
+        }
         match.playMatch();
         return match;
     }
@@ -107,6 +105,7 @@ class SpringPlayoffs extends Season {
     }
 
     public Season newInstance(List<Team> teams) {
-        return new SpringPlayoffs(teams);
+        return new SpringSplit(teams);
     }
+
 }

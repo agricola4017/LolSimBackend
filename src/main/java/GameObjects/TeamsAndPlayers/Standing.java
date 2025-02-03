@@ -1,10 +1,7 @@
-package GameObjects.Game;
+package GameObjects.TeamsAndPlayers;
 
 import java.util.List;
-
-import GameObjects.TeamsAndPlayers.Team;
 import java.util.LinkedList;
-import java.util.Arrays;
 import java.io.Serializable;
 
 public class Standing implements Comparable<Standing>, Serializable {

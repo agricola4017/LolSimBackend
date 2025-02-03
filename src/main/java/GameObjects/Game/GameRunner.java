@@ -1,6 +1,7 @@
 package GameObjects.Game;
 
 import GameObjects.Game.GameUI.GameControllerUI;
+import GameObjects.Game.UIGameService;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
 

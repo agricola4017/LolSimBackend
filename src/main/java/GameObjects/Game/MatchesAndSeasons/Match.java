@@ -1,4 +1,4 @@
-package GameObjects.Game;
+package GameObjects.Game.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Position;
@@ -10,18 +10,18 @@ import java.util.Map;
 
 import static Functions.Functions.rollPercentile;
 
-class Match extends MatchAbstract {
+public class Match extends MatchAbstract {
     private Team[] teams;
     private int matches;
     private MatchLog matchLog;
-    Match(Team team1, Team team2, int matches) {
+    public Match(Team team1, Team team2, int matches) {
         this.teams = new Team[2];
         this.teams[0] = team1;
         this.teams[1] = team2;
         this.matches = matches;
     }
 
-    int waveValue(int economy) {
+    private int waveValue(int economy) {
         int waveGold = 280;
         int probabilityGold = 50;
         int skilledWaveGold = waveGold - probabilityGold;
@@ -33,11 +33,11 @@ class Match extends MatchAbstract {
         return res;
     }
 
-    int calculateCs(int waveValue) {
+    private int calculateCs(int waveValue) {
         return (int)Math.round((waveValue/280.0)*8);
     }
 
-    boolean kill(int lan1, int lan2, int agg1, int cons2) {
+    private boolean kill(int lan1, int lan2, int agg1, int cons2) {
         double lanediff = .6*(lan1 - lan2);
         final double varInfl = 0.4;
         final double percentageKill = 8;
@@ -47,7 +47,8 @@ class Match extends MatchAbstract {
 
         return rollPercentile(statPercentile) || rollPercentile(percentageKill);
     }
-    void playMatch() {
+    
+    public void playMatch() {
         Team team1 = this.teams[0];
         Team team2 = this.teams[1];
 

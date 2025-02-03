@@ -1,4 +1,4 @@
-package GameObjects.Game;
+package GameObjects.Game.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
 
@@ -51,19 +51,19 @@ public abstract class Season implements Serializable{
     //how many matches played in one set
     private int oneSetCount;
     private String name;
-    Match playMatch() {
+    public Match playMatch() {
         Match match = matchesToBePlayed.poll();
         match.playMatch();
         return match;
     }
-    abstract int getOneSetCount();
+    public abstract int getOneSetCount();
 
-    abstract String getName();
+    public abstract String getName();
 
-    abstract boolean isFinished();
+    public abstract boolean isFinished();
 
-    abstract Queue<Match> getMatchesToBePlayed();
+    public abstract Queue<Match> getMatchesToBePlayed();
 
-    abstract Season newInstance(List<Team> teams);
+    public abstract Season newInstance(List<Team> teams);
 
 }
