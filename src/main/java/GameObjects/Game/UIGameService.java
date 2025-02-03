@@ -13,6 +13,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import Functions.Functions;
 import java.awt.event.ActionListener;
+
+import static Functions.Functions.flattenListString;
+
 import java.awt.event.ActionEvent;
 
 import java.util.HashMap;
@@ -36,6 +39,7 @@ public class UIGameService {
     private JButton findTeamButton;
     private JButton saveGameButton;
     private JButton loadGameButton;
+    private GameUIGenerator gameUIGenerator;
 
     public UIGameService(Game game, GameControllerUI gameControllerUI) {
         this.playSeasonButton = gameControllerUI.getPlaySeasonButton();
@@ -50,6 +54,7 @@ public class UIGameService {
         this.saveGameButton = gameControllerUI.getSaveGameButton();
         this.loadGameButton = gameControllerUI.getLoadGameButton();
         this.game = game;
+        this.gameUIGenerator = new GameUIGenerator();
     }
 
     /**
@@ -64,14 +69,11 @@ public class UIGameService {
             public void actionPerformed(ActionEvent e) {
                 Season currentSeason = game.getSeasonsToPlay().peek();
                 MatchLog matchLog = game.playSeason(currentSeason);
-                Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
-                Team playingTeam = game.getPlayingTeam();
                 
-                GameUIGenerator.createOrUpdateTextFrame("standings", "Standings", game.standingsToString());
-                String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
-                GameUIGenerator.createOrUpdateTextFrame("teamInfo", "Team Info", teamInfo);         
+                refreshOrCreateTeamInfo();
+                refreshOrCreateStandings();
                 if (matchLog != null)
-                    GameUIGenerator.createOrUpdateTextFrame("matchLog", "Match Log", matchLog.toString());
+                    refreshOrCreateMatchLog(matchLog);
                 try {
                     Thread.sleep(100);
                     game.countDownLatch();
@@ -90,15 +92,12 @@ public class UIGameService {
             public void actionPerformed(ActionEvent e) {   
                 Season currentSeason = game.getSeasonsToPlay().peek();   
                 MatchLog matchLog = game.playMatch(currentSeason);
-                Team playingTeam = game.getPlayingTeam();
-                Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
 
                 if (matchLog != null) {
-                    GameUIGenerator.createOrUpdateTextFrame("matchLog", "Match Log", matchLog.toString());
+                    refreshOrCreateMatchLog(matchLog);
                     // Also update standings after each game
-                    GameUIGenerator.createOrUpdateTextFrame("standings", "Standings", game.standingsToString());
-                    String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
-                    GameUIGenerator.createOrUpdateTextFrame("teamInfo", "Team Info", teamInfo);
+                    refreshOrCreateStandings();
+                    refreshOrCreateTeamInfo();
                 }
                 try {
                     Thread.sleep(100);
@@ -122,19 +121,17 @@ public class UIGameService {
                 Season currentSeason = game.getSeasonsToPlay().peek();
                 MatchLog matchLog;
                 Team playingTeam = game.getPlayingTeam();
-                Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
 
                 do {
                     matchLog = game.playMatch(currentSeason);
                 } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
                 
                 if (matchLog != null) {
-                GameUIGenerator.createOrUpdateTextFrame("matchLog", "Match Log", matchLog.toString());
+                    refreshOrCreateMatchLog(matchLog);
                 }    
                 // Also update standings after each game
-                GameUIGenerator.createOrUpdateTextFrame("standings", "Standings", game.standingsToString());
-                String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
-                GameUIGenerator.createOrUpdateTextFrame("teamInfo", "Team Info", teamInfo);
+                refreshOrCreateStandings();
+                refreshOrCreateTeamInfo();
 
                 try {
                     Thread.sleep(100);
@@ -155,7 +152,7 @@ public class UIGameService {
         ActionListener seeStandingsListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                GameUIGenerator.createOrUpdateTextFrame("standings", "Standings", game.standingsToString());
+                refreshOrCreateStandings();
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -169,12 +166,7 @@ public class UIGameService {
         ActionListener seeTeamInfoListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Team playingTeam = game.getPlayingTeam();
-                Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
-
-                String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + 
-                    playingTeam.toString();
-                GameUIGenerator.createOrUpdateTextFrame("teamInfo", "Team Info", teamInfo);
+                refreshOrCreateTeamInfo();
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -190,10 +182,9 @@ public class UIGameService {
             public void actionPerformed(ActionEvent e) {
                 // Get player signing form
                 Team playingTeam = game.getPlayingTeam();
-                Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
                 List<Player> activePlayers = game.getActivePlayers();
                 Map<Integer, Player> playerIDtoPlayerMap = game.getPlayerIDtoPlayerMap();
-                GameUIGenerator.createPlayerSigningForm((name, position, ovr) -> {
+                gameUIGenerator.createPlayerSigningForm((name, position, ovr) -> {
                     Player player = Player.generateNamedPlayerFromOVRandPosition(
                         name, 
                         ovr, 
@@ -204,8 +195,7 @@ public class UIGameService {
                     activePlayers.add(player);
                     playingTeam.addPlayer(player);
                     playingTeam.normalizePlayers();
-                    String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
-                    GameUIGenerator.createOrUpdateTextFrame("teamInfo", "Team Info", teamInfo);
+                    refreshOrCreateTeamInfo();
                 });
             }
         };
@@ -218,13 +208,13 @@ public class UIGameService {
                 // Get player search form
                 Map<Integer, Player> playerIDtoPlayerMap = game.getPlayerIDtoPlayerMap();
 
-                GameUIGenerator.createFindByIDForm("Find Player by ID","Find Player by ID", (playerID) -> {
+                gameUIGenerator.createFindByIDForm("Find Player by ID","Find Player by ID", (playerID) -> {
                     if (!playerIDtoPlayerMap.containsKey(playerID)) {
-                        GameUIGenerator.updateIDForm("Find Player by ID", "Player not found");
+                        gameUIGenerator.updateIDForm("Find Player by ID", "Player not found");
                         return;
                     }
                     Player player = playerIDtoPlayerMap.get(playerID);
-                    GameUIGenerator.updateIDForm("Find Player by ID", player.toString() + "\n" + player.getStat().toString());
+                    gameUIGenerator.updateIDForm("Find Player by ID", player.toString() + "\n" + player.getStat().toString());
                 });
                 
             }
@@ -233,10 +223,9 @@ public class UIGameService {
         buttonToActionListenerMap.put(findPlayerButton, findPlayerListener);
 
         ActionListener seePlayersListener = new ActionListener() {
-            List<Player> activePlayers = game.getActivePlayers();
             @Override
             public void actionPerformed(ActionEvent e) {
-                GameUIGenerator.createOrUpdateTextFrame("players", "Players", Functions.flattenListString(activePlayers));
+               refreshOrCreatePlayerInfo();
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -252,13 +241,13 @@ public class UIGameService {
             public void actionPerformed(ActionEvent e) {
                 Map<Integer, Team> teamIDtoTeamMap = game.getTeamIDtoTeamMap();
                 // Get player search form
-                GameUIGenerator.createFindByIDForm("Find Team by ID","Find Team by ID", (teamID) -> {
+                gameUIGenerator.createFindByIDForm("Find Team by ID","Find Team by ID", (teamID) -> {
                     if (!teamIDtoTeamMap.containsKey(teamID)) {
-                        GameUIGenerator.updateIDForm("Find Team by ID", "Team not found");
+                        gameUIGenerator.updateIDForm("Find Team by ID", "Team not found");
                         return;
                     }
                     Team team = teamIDtoTeamMap.get(teamID);
-                    GameUIGenerator.updateIDForm("Find Team by ID", team.toString());
+                    gameUIGenerator.updateIDForm("Find Team by ID", team.toString());
                 });
                 
             }
@@ -313,14 +302,31 @@ public class UIGameService {
                     System.out.println("Error loading game: " + ex.getMessage());
                 } 
                     // Also update standings after each game
-                GameUIGenerator.createOrUpdateTextFrame("standings", "Standings", game.standingsToString());
-                Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
-                Team playingTeam = game.getPlayingTeam();
-                String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
-                GameUIGenerator.createOrUpdateTextFrame("teamInfo", "Team Info", teamInfo);
+                refreshOrCreateStandings();
+                refreshOrCreateTeamInfo();
             }
         };
         loadGameButton.addActionListener(loadGameListener);
         buttonToActionListenerMap.put(loadGameButton, loadGameListener);
+    }
+
+    void refreshOrCreateStandings() {
+        gameUIGenerator.createOrUpdateTextPanel("standings", "Standings", 
+            game.getSeasonsToPlay().peek().getName() + "\n" + game.standingsToString());
+    }
+
+    void refreshOrCreateTeamInfo() {
+        Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
+        Team playingTeam = game.getPlayingTeam();
+        String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
+        gameUIGenerator.createOrUpdateTextPanel("teamInfo", "Team Info", teamInfo);
+    }
+
+    void refreshOrCreateMatchLog(MatchLog matchLog) {
+        gameUIGenerator.createOrUpdateTextPanel("matchLog", "Match Log", matchLog.toString());
+    }   
+
+    void refreshOrCreatePlayerInfo() {
+        gameUIGenerator.createOrUpdateTextPanel("playerInfo", "Player Info", flattenListString(game.getActivePlayers()));
     }
 }

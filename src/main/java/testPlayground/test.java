@@ -1,67 +1,30 @@
-/*
 package testPlayground;
+
+import static Functions.Functions.randomNumberSlowFast;
+
+import Functions.ExternalAPICallUtility;
 
 public class test {
 
     public static void main(String[] args) {
-        //employee - id, name, salary, address, city
-        //address - home address, office address
-        //list of employees
-        // passed ids, get address
-
-        list employees;
-        function(long employee_id) {
-
-            for (employee e: employees) {
-                if (e.id = employee_id) {
-                    return e.home_address;
-                }
-            }
-
-            return "ADDR_NOT_FOUND";
-            return null;
-        }
-
-        class call_me
-
-            operation(int a, int b) throws Exception {
-                return a+b;
+    //ZSystem.out.println(ExternalAPICallUtility.generateName());
+        int[] bucket = new int[4];
+        for (int i = 0; i < 100; i++) {
+            int val = randomNumberSlowFast(0, 100);
+            System.out.print(val + ", ");
+            if (val < 25) {
+                bucket[0]++;
+            } else if (val < 50) {
+                bucket[1]++;
+            } else if (val < 75) {
+                bucket[2]++;
+            } else {
+                bucket[3]++;
             }
         }
-
-        AUTO_ADD
-
-        call operation -> return mult(a,b)
-
-        class_call_me_subclass extends call_me
-
-            operation(int a, int b) {
-                return a*b;
-            }
-
-
-            class Call_me {
-
-                Call_me call_me;
-                private call_me() {
-                    call_me = new Call_me();
-                }
-
-                public synchronized static Call_me get_instance() {
-                    if (call_me == null) {
-                        call_me();
-                    }
-                    return call_me;
-                }
-
-                synchronized(call_me)
-
-                {
-
-                }
-            }
-
-            java 8 api, synchronized class
-    }
+        System.out.println();
+        for (int buck : bucket) {
+            System.out.println(buck);
+        }
+    }   
 }
-*/

@@ -15,63 +15,70 @@ import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import GameObjects.Game.Game;
 import GameObjects.Game.Callbacks.PlayerFormCallback;
 import GameObjects.Game.Callbacks.IDFormCallback;
-import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Position;
 
-import java.awt.Font;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import javax.swing.JPanel;
 
 public class GameUIGenerator {
-    private static Map<String, JFrame> activeFrames = new HashMap<>();
-    private static Map<String, JLabel> activeLabels = new HashMap<>();
+    private JFrame mainFrame;
+    private Map<String, JPanel> activePanels;
+    private Map<String, JFrame> activeFrames;
+    private Map<String, JLabel> activeLabels;
 
-    public static void createOrUpdateTextFrame(String frameId, String title, String message) {
-        JFrame frame = activeFrames.get(frameId);
+    public GameUIGenerator() {
+        mainFrame = new JFrame("Game UI");
+        mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        mainFrame.setSize(1200, 800);
+        mainFrame.setLayout(new FlowLayout());
+        activePanels = new HashMap<>();
+        activeFrames = new HashMap<>();
+        activeLabels = new HashMap<>();
+
+        mainFrame.setVisible(true);
+    }
+
+    public void createOrUpdateTextPanel(String panelId, String title, String message) {
+        JPanel panel = activePanels.get(panelId);
         JLabel messageLabel;
 
-        if (frame == null) {
+        if (panel == null) {
             // Create new frame if it doesn't exist
-            frame = new JFrame(title);
-            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setSize(900, 600);
-            frame.setLayout(new FlowLayout());
-
+            panel = new JPanel();
+            panel.setLayout(new BorderLayout());
+            JLabel titleLabel = new JLabel(title);
+            JTextArea messageArea = new JTextArea(message);
+            messageArea.setEditable(false); // Make it read-only
             // Create new label
-            messageLabel = new JLabel();
-            frame.add(messageLabel);
+            panel.add(titleLabel, BorderLayout.NORTH);
+            panel.add(new JScrollPane(messageArea), BorderLayout.CENTER);
 
-            // Store references
-            activeFrames.put(frameId, frame);
-            activeLabels.put(frameId, messageLabel);
-            
-            // Add window listener for cleanup
-            addWindowListener(frameId, frame);
+            // Add the new panel to the parent frame
+            mainFrame.add(panel);
+            activePanels.put(panelId, panel);
         } else {
-            messageLabel = activeLabels.get(frameId);
-            frame.setTitle(title);
+            JTextArea messageArea = (JTextArea) ((JScrollPane) panel.getComponent(1)).getViewport().getView();
+            messageArea.setText(message);
+            //panel.setTitle(title);
         }
-
-        // Update content
-        messageLabel.setText("<html>" + message.replace("\n", "<br>") + "</html>");
-        
         // Update font size
-        int newFontSize = Math.max(12, frame.getWidth() / 50);
-        messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
+        int newFontSize = Math.max(12, panel.getWidth() / 60);
+        //messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
 
         // Show frame if not visible
-        if (!frame.isVisible()) {
-            frame.setVisible(true);
+        if (!panel.isVisible()) {
+            panel.setVisible(true);
         }
 
         // Revalidate and repaint
-        frame.revalidate();
-        frame.repaint();
+        panel.revalidate();
+        panel.repaint();
     }
 
-    public static void createPlayerSigningForm(PlayerFormCallback callback) {
+    public void createPlayerSigningForm(PlayerFormCallback callback) {
         JFrame frame = new JFrame("Sign a Player");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(400, 300);
@@ -116,7 +123,7 @@ public class GameUIGenerator {
         frame.setVisible(true);
     }
 
-    public static void createFindByIDForm(String identifier, String title, IDFormCallback callback) {
+    public void createFindByIDForm(String identifier, String title, IDFormCallback callback) {
         JFrame frame = new JFrame(title);
         activeFrames.put(identifier, frame);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -144,7 +151,7 @@ public class GameUIGenerator {
         frame.setVisible(true);
     }
     
-    public static void updateIDForm(String frameId, String message) {
+    public void updateIDForm(String frameId, String message) {
         JFrame frame = activeFrames.get(frameId);
         JLabel messageLabel;
 
@@ -179,11 +186,11 @@ public class GameUIGenerator {
     }
 
     // Method to check if a frame exists
-    public static boolean hasFrame(String frameId) {
+    public boolean hasFrame(String frameId) {
         return activeFrames.containsKey(frameId);
     }
     // Method to dispose a frame
-    public static void disposeFrame(String frameId) {
+    public void disposeFrame(String frameId) {
         JFrame frame = activeFrames.remove(frameId);
         if (frame != null) {
             frame.dispose();
@@ -192,7 +199,7 @@ public class GameUIGenerator {
     }
 
     // Add window listener to remove from maps when closed
-    private static void addWindowListener(String frameId, JFrame frame) {
+    private void addWindowListener(String frameId, JFrame frame) {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {

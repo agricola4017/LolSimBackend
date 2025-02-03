@@ -2,6 +2,7 @@ package GameObjects.TeamsAndPlayers;
 
 import static Functions.Functions.randomNumber0to100;
 import static Functions.Functions.randomNumberCustom;
+import static Functions.Functions.randomNumberSlowFast;
 
 import java.io.Serializable;
 
@@ -93,26 +94,67 @@ public class Stat implements Serializable{
         return new Stat(laning, teamfighting, economy, consistency, teamwork, aggression, stamina, potential);
     }
 
+    public void calculatePotential(int age) {
+        randomNumberCustom(0, 10);
+
+        // random effect
+        int randomValue = randomNumberSlowFast(0, 20);
+        // flat effect
+        if (age <= 20) {
+            this.potential = Math.min(100, this.getOVR() + 15 + randomValue);
+        } else if (age <= 24) {
+            this.potential = Math.min(100, this.getOVR() + 10 + randomValue);
+        } else if (age <= 28) {
+            this.potential = Math.min(100, this.getOVR() + 5 + randomValue);
+        } else { 
+            this.potential = Math.min(100, this.getOVR() + randomValue);
+        }
+    }
+
+    public void changeStats(int improvementChance, int declineChance) {
+        //needs more complex knowledge, not just spread random
+        //for example, old player gets much better at economy specifically but worse at aggression
+
+        int old = this.getOVR();
+             
+        int randomValue = (int) (Math.random() * 100); // Generate random number between 0 and 99
+        
+        if (randomValue < improvementChance) {
+            increaseStats();
+        } 
+
+        randomValue = (int) (Math.random() * 100); // Generate random number between 0 and 99
+
+        if (randomValue < declineChance) {
+            decreaseStats();
+        }
+
+        int delta = this.getOVR() - old;
+        this.potential = Math.min(100, this.potential + delta);
+    }
     public void increaseStats() {
-        this.laning += randomNumberCustom(1,3);
-        this.teamfighting += randomNumberCustom(1,3);
-        this.economy += randomNumberCustom(1,3);
-        this.consistency += randomNumberCustom(1,3);
-        this.teamwork += randomNumberCustom(1,3);
-        this.aggression += randomNumberCustom(1,3);
-        this.stamina += randomNumberCustom(1,3);
-        this.potential += 3;
+        int delta = this.potential - this.getOVR();
+        this.laning += randomNumberCustom(1,delta);
+        this.teamfighting += randomNumberCustom(1,delta);
+        this.economy += randomNumberCustom(1,delta);
+        this.consistency += randomNumberCustom(1,delta);
+        this.teamwork += randomNumberCustom(1,delta);
+        this.aggression += randomNumberCustom(1,delta);
+        this.stamina += randomNumberCustom(1,delta);
+        this.potential += delta;
     }
 
     public void decreaseStats() {
-        this.laning -= randomNumberCustom(1,3);
-        this.teamfighting -= randomNumberCustom(1,3);
-        this.economy -= randomNumberCustom(1,3);
-        this.consistency -= randomNumberCustom(1,3);
-        this.teamwork -= randomNumberCustom(1,3);
-        this.aggression -= randomNumberCustom(1,3);
-        this.stamina -= randomNumberCustom(1,3);
-        this.potential -= 3;
+        //decrease should not actually use POT, we should have big increases but NOT big decreases 
+        int delta = this.potential - this.getOVR();
+        this.laning -= randomNumberCustom(1,delta);
+        this.teamfighting -= randomNumberCustom(1,delta);
+        this.economy -= randomNumberCustom(1,delta);
+        this.consistency -= randomNumberCustom(1,delta);
+        this.teamwork -= randomNumberCustom(1,delta);
+        this.aggression -= randomNumberCustom(1,delta);
+        this.stamina -= randomNumberCustom(1,delta);
+        this.potential -= delta;
     }
     public int getLaning() {
         return laning;

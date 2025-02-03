@@ -1,5 +1,9 @@
 package GameObjects.TeamsAndPlayers;
+
+import static Functions.Functions.randomNumberCustom;
+
 import java.io.Serializable;
+import Functions.ExternalAPICallUtility;
 
 public class Player implements Serializable {
     private int playerID;
@@ -24,14 +28,15 @@ public class Player implements Serializable {
     //generate random player
     public Player() {
         this.playerID = counter; //grab latest id
-        this.playerName = "test" + this.playerID; //generate name
+        this.playerName = randomName();
         this.teamID = -1;
-        this.age = 17;
+        this.age = randomNumberCustom(17, 23);
         this.position = Position.top; //randomize
         this.value = 165.55f;
         this.stat = new Stat(); //generate
         this.region = Region.NA; //randomize
         this.OVR = stat.getOVR();
+        this.stat.calculatePotential(age);
         counter++;
         
     }
@@ -46,27 +51,27 @@ public class Player implements Serializable {
         this.stat = stat;
         this.region = region;
         this.OVR = stat.getOVR();
+        this.stat.calculatePotential(age);
         counter++;
     }
 
     public static Player generatePlayer() {
         int playerID = counter; //grab latest id
-        String playerName = "test" + playerID; //generate name
+        String playerName = randomName();
         int teamID = -1;
-        int age = 17;
+        int age = randomNumberCustom(17, 23);
         Position position = Position.generateRandomPosition();
         float value = 65.00f;
         Stat stat = Stat.generateRandomStats();
         Region region = Region.generateRandomRegion();
         counter++;
-
         return new Player(playerID, playerName, teamID, age, position, value, stat, region);
     }
 
     public static Player generateNamedPlayerFromOVRandPosition(String name, int OVR, int teamID, Position position) {
         int playerID = counter; //grab latest id
         String playerName = name;
-        int age = 17;
+        int age = randomNumberCustom(17, 23);
         float value = 65.00f;
         Stat stat = Stat.generateRandomStats(OVR);
         Region region = Region.generateRandomRegion();
@@ -77,8 +82,8 @@ public class Player implements Serializable {
 
     public static Player generatePlayerWithTeam(int teamId) {
         int playerID = counter; //grab latest id
-        String playerName = "test" + playerID; //generate name
-        int age = 17;
+        String playerName =  randomName();
+        int age = randomNumberCustom(17, 23);
         Position position = Position.generateRandomPosition();
         float value = 65.00f;
         Stat stat = Stat.generateRandomStats();
@@ -90,7 +95,7 @@ public class Player implements Serializable {
 
     public static Player generatePerfectPlayer(int teamId) {
         int playerID = counter; //grab latest id
-        String playerName = "test" + playerID; //generate name
+        String playerName = randomName();
         int age = 17;
         Position position = Position.generateRandomPosition();
         float value = 65.00f;
@@ -99,6 +104,10 @@ public class Player implements Serializable {
         counter++;
 
         return new Player(playerID, playerName, teamId, age, position, value, stat, region);
+    }
+
+    public static String randomName() {
+        return ExternalAPICallUtility.generateName();
     }
 
     public void updateSeasonStats(int kills, int deaths, int cs, int gold) {
@@ -124,13 +133,9 @@ public class Player implements Serializable {
             return new int[] {this.kills/gamesPlayed, this.deaths/gamesPlayed, this.cs/gamesPlayed, this.gold/gamesPlayed};
     }
 
-    public void increaseStats() {
-        this.stat.increaseStats();
+    public void changeStats(int improvementChance, int declineChance) {
+        this.stat.changeStats(improvementChance, declineChance);
     }
-
-    public void decreaseStats() { 
-        this.stat.decreaseStats(); 
-    } //decreaseStats
 
     public int getPlayerID() {
         return playerID;

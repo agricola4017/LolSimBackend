@@ -8,34 +8,31 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class main {
+public class Main {
 
     final static Set<Integer> setint = new HashSet<>();
 
     public static void main(String[] args) throws InterruptedException {
-        final int abc;
-        abc=4;
+        final int abc = 4;
 
         System.out.println(abc);
-
         setint.add(3);
 
         long startTime = System.currentTimeMillis();
         RunnableImpl.addValues();
-        //System.out.println(RunnableImpl.q);
 
         List<Thread> threads = new ArrayList<>();
-        //CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(4); // Assuming 4 threads
+
         for (int i = 0; i < 4; i++) {
-            Thread t1 = new Thread(new RunnableImpl());
+            Thread t1 = new Thread(new RunnableImpl(latch));
             threads.add(t1);
+            t1.start(); // Start the thread immediately
         }
 
-        for (Thread thread: threads) {
-            thread.start();
-            thread.join();
-        }
-        //latch.await();
+        // Wait for all threads to finish
+        latch.await();
+
         System.out.println(RunnableImpl.a);
         long endTime = System.currentTimeMillis();
         System.out.println("Total execution time Threads: " + (endTime - startTime));
@@ -43,7 +40,7 @@ public class main {
         startTime = System.currentTimeMillis();
         int sum = 0;
         for (int i = 0; i < 1000000; i++) {
-            sum+=i;
+            sum += i;
         }
         System.out.println(sum);
         endTime = System.currentTimeMillis();
@@ -51,30 +48,25 @@ public class main {
     }
 }
 
- class RunnableImpl implements Runnable {
+class RunnableImpl implements Runnable {
     static ConcurrentLinkedQueue<Integer> q = new ConcurrentLinkedQueue<>();
     static AtomicInteger a = new AtomicInteger(0);
-    public void run() {
-        int b = 0;
+    private CountDownLatch latch;
 
-        while (!q.isEmpty()) {
-            //List<Integer> vals = new ArrayList<>();
-            //int it = 0;
-            //while (!q.isEmpty() && it < 1) {
-            //    vals.add(q.poll());
-            //}
-
-            //for (int val: vals) {
-            //    b+=val;
-            //}
-            //a.getAndAdd(val);
-
-            a.getAndAdd(q.poll());
-        }
-        //System.out.println(a.getAndAdd(val));
+    public RunnableImpl(CountDownLatch latch) {
+        this.latch = latch;
     }
-     static void addValues() {
-        for (int i = 0 ; i < 1000000; i ++) {
+
+    public void run() {
+        Integer value;
+        while ((value = q.poll()) != null) {
+            a.getAndAdd(value);
+        }
+        latch.countDown(); // Signal that this thread is done
+    }
+
+    static void addValues() {
+        for (int i = 0; i < 1000000; i++) {
             q.add(i);
         }
     }
