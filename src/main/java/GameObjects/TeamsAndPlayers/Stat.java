@@ -101,11 +101,11 @@ public class Stat implements Serializable{
         int randomValue = randomNumberSlowFast(0, 20);
         // flat effect
         if (age <= 20) {
-            this.potential = Math.min(100, this.getOVR() + 15 + randomValue);
+            this.potential = Math.min(100, this.getOVR() + randomNumberSlowFast(0, 100-this.getOVR()) + randomValue);
         } else if (age <= 24) {
-            this.potential = Math.min(100, this.getOVR() + 10 + randomValue);
+            this.potential = Math.min(100, this.getOVR() + randomNumberSlowFast(0, 100-this.getOVR()) + randomValue);
         } else if (age <= 28) {
-            this.potential = Math.min(100, this.getOVR() + 5 + randomValue);
+            this.potential = Math.min(100, this.getOVR() + randomNumberSlowFast(0, 100-this.getOVR()) + randomValue);
         } else { 
             this.potential = Math.min(100, this.getOVR() + randomValue);
         }
@@ -120,41 +120,47 @@ public class Stat implements Serializable{
         int randomValue = (int) (Math.random() * 100); // Generate random number between 0 and 99
         
         if (randomValue < improvementChance) {
-            increaseStats();
+            increaseStats(randomValue);
         } 
 
         randomValue = (int) (Math.random() * 100); // Generate random number between 0 and 99
 
         if (randomValue < declineChance) {
-            decreaseStats();
+            decreaseStats(randomValue);
         }
 
         int delta = this.getOVR() - old;
-        this.potential = Math.min(100, this.potential + delta);
+        if (delta >= 0) {
+            delta = (int)Math.round(Math.random() * delta);
+            this.potential = Math.min(100, this.potential + delta);
+            this.potential = Math.max(this.getOVR(), this.potential);
+        } else {
+            delta = (int)Math.round(Math.random() * delta);
+            this.potential = Math.max(0, this.potential + delta); 
+        }
     }
-    public void increaseStats() {
+    public void increaseStats(int randomValue) {
         int delta = this.potential - this.getOVR();
-        this.laning += randomNumberCustom(1,delta);
-        this.teamfighting += randomNumberCustom(1,delta);
-        this.economy += randomNumberCustom(1,delta);
-        this.consistency += randomNumberCustom(1,delta);
-        this.teamwork += randomNumberCustom(1,delta);
-        this.aggression += randomNumberCustom(1,delta);
-        this.stamina += randomNumberCustom(1,delta);
-        this.potential += delta;
+        
+        this.laning += randomNumberSlowFast(1,delta);
+        this.teamfighting += randomNumberSlowFast(1,delta);
+        this.economy += randomNumberSlowFast(1,delta);
+        this.consistency += randomNumberSlowFast(1,delta);
+        this.teamwork += randomNumberSlowFast(1,delta);
+        this.aggression += randomNumberSlowFast(1,delta);
+        this.stamina += randomNumberSlowFast(1,delta);
     }
 
-    public void decreaseStats() {
+    public void decreaseStats(int randomValue) {
         //decrease should not actually use POT, we should have big increases but NOT big decreases 
         int delta = this.potential - this.getOVR();
-        this.laning -= randomNumberCustom(1,delta);
-        this.teamfighting -= randomNumberCustom(1,delta);
-        this.economy -= randomNumberCustom(1,delta);
-        this.consistency -= randomNumberCustom(1,delta);
-        this.teamwork -= randomNumberCustom(1,delta);
-        this.aggression -= randomNumberCustom(1,delta);
-        this.stamina -= randomNumberCustom(1,delta);
-        this.potential -= delta;
+        this.laning -= randomNumberSlowFast(1,delta);
+        this.teamfighting -= randomNumberSlowFast(1,delta);
+        this.economy -= randomNumberSlowFast(1,delta);
+        this.consistency -= randomNumberSlowFast(1,delta);
+        this.teamwork -= randomNumberSlowFast(1,delta);
+        this.aggression -= randomNumberSlowFast(1,delta);
+        this.stamina -= randomNumberSlowFast(1,delta);
     }
     public int getLaning() {
         return laning;
@@ -213,7 +219,7 @@ public class Stat implements Serializable{
     }
 
     public int getPotential() {
-        return potential;
+        return this.potential;
     }
 
     public void setPotential(int potential) {

@@ -9,6 +9,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,8 +21,14 @@ import GameObjects.Game.Callbacks.IDFormCallback;
 import GameObjects.TeamsAndPlayers.Position;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
+import java.awt.event.MouseAdapter;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.Color;
+import java.awt.Cursor;
 
 public class GameUIGenerator {
     private JFrame mainFrame;
@@ -43,30 +50,68 @@ public class GameUIGenerator {
 
     public void createOrUpdateTextPanel(String panelId, String title, String message) {
         JPanel panel = activePanels.get(panelId);
-        JLabel messageLabel;
 
         if (panel == null) {
             // Create new frame if it doesn't exist
             panel = new JPanel();
             panel.setLayout(new BorderLayout());
+
             JLabel titleLabel = new JLabel(title);
             JTextArea messageArea = new JTextArea(message);
             messageArea.setEditable(false); // Make it read-only
             // Create new label
+            JScrollPane scrollPane = new JScrollPane(messageArea);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+            scrollPane.setPreferredSize(new Dimension(500,300));
             panel.add(titleLabel, BorderLayout.NORTH);
-            panel.add(new JScrollPane(messageArea), BorderLayout.CENTER);
+            panel.add(scrollPane, BorderLayout.CENTER);
+
+            JButton closePanelButton = new JButton("Close " + panelId);
+            closePanelButton.addActionListener(e -> {
+                activePanels.get(panelId).setVisible(false);
+            });
+
+            // Create a resize handle
+            JPanel resizeHandle = new JPanel();
+            resizeHandle.setPreferredSize(new Dimension(10, 10)); // Size of the handle
+            resizeHandle.setBackground(Color.GRAY); // Color of the handle
+            resizeHandle.setCursor(Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR)); // Change cursor on hover
+            resizeHandle.setFocusable(true);
+            // Add mouse listener for resizing
+            resizeHandle.addMouseListener(new MouseAdapter() {
+                private Point initialClick;
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    // Get the initial click point
+                    System.out.println("Resizing " + panelId + " at " + e.getPoint());
+                    initialClick = e.getPoint();
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    // Get the current size of the panel
+                    JPanel panel = activePanels.get(panelId);
+                    int newWidth = panel.getWidth() + (e.getX() - initialClick.x);
+                    int newHeight = panel.getHeight() + (e.getY() - initialClick.y);
+                    // Set the new size
+                    panel.setPreferredSize(new Dimension(newWidth, newHeight));
+                    panel.revalidate(); // Revalidate the panel
+                    panel.repaint(); // Repaint the panel
+                }
+            });
 
             // Add the new panel to the parent frame
+            panel.add(resizeHandle, BorderLayout.EAST);
+            panel.add(closePanelButton, BorderLayout.SOUTH);
             mainFrame.add(panel);
             activePanels.put(panelId, panel);
         } else {
             JTextArea messageArea = (JTextArea) ((JScrollPane) panel.getComponent(1)).getViewport().getView();
             messageArea.setText(message);
-            //panel.setTitle(title);
         }
-        // Update font size
-        int newFontSize = Math.max(12, panel.getWidth() / 60);
-        //messageLabel.setFont(new Font("Arial", Font.PLAIN, newFontSize));
 
         // Show frame if not visible
         if (!panel.isVisible()) {

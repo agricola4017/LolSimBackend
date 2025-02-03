@@ -87,8 +87,9 @@ public class PlayerRoster implements Serializable {
     public String toString() {
         String ret = "PlayerRoster: \n";
         ret += "------------------------\n";
+        ret += "Position | " + Player.toStringHeaders() + "\n";
         for (Position p : Position.values()) {
-            ret += p + ": " + activePlayers.get(p) + "\n";
+            ret += p + " | " + activePlayers.get(p) + "\n";
         }
         ret += "------------------------\n";
         return ret;

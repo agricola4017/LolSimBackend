@@ -10,13 +10,13 @@ public class test {
     //ZSystem.out.println(ExternalAPICallUtility.generateName());
         int[] bucket = new int[4];
         for (int i = 0; i < 100; i++) {
-            int val = randomNumberSlowFast(0, 100);
+            int val = randomNumberSlowFast(0, 20);
             System.out.print(val + ", ");
-            if (val < 25) {
+            if (val < 5) {
                 bucket[0]++;
-            } else if (val < 50) {
+            } else if (val < 10) {
                 bucket[1]++;
-            } else if (val < 75) {
+            } else if (val < 15) {
                 bucket[2]++;
             } else {
                 bucket[3]++;

@@ -41,13 +41,18 @@ public class UIGameService {
     private JButton loadGameButton;
     private GameUIGenerator gameUIGenerator;
 
+    private static final String TEAMINFO_PANELLID = "teamInfo";
+    private static final String PLAYERINFO_PANELLID = "playerInfo";
+    private static final String MATCHLOG_PANELID = "matchLog";
+    private static final String STANDINGS_PANELID = "standings";
+
     public UIGameService(Game game, GameControllerUI gameControllerUI) {
         this.playSeasonButton = gameControllerUI.getPlaySeasonButton();
         this.playGameButton = gameControllerUI.getPlayGameButton();
+        this.playTeamGameButton = gameControllerUI.getPlayTeamGameButton();
         this.seeStandingsButton = gameControllerUI.getSeeStandingsButton();
         this.seeTeamInfoButton = gameControllerUI.getSeeTeamInfoButton();
         this.signPlayerButton = gameControllerUI.getSignPlayerButton();
-        this.playTeamGameButton = gameControllerUI.getPlayTeamGameButton();
         this.findPlayerButton = gameControllerUI.getFindPlayerButton();
         this.seePlayersButton = gameControllerUI.getSeePlayersButton();
         this.findTeamButton = gameControllerUI.getFindTeamButton();
@@ -311,7 +316,7 @@ public class UIGameService {
     }
 
     void refreshOrCreateStandings() {
-        gameUIGenerator.createOrUpdateTextPanel("standings", "Standings", 
+        gameUIGenerator.createOrUpdateTextPanel(STANDINGS_PANELID, "Standings", 
             game.getSeasonsToPlay().peek().getName() + "\n" + game.standingsToString());
     }
 
@@ -319,14 +324,15 @@ public class UIGameService {
         Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
         Team playingTeam = game.getPlayingTeam();
         String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
-        gameUIGenerator.createOrUpdateTextPanel("teamInfo", "Team Info", teamInfo);
+        gameUIGenerator.createOrUpdateTextPanel(TEAMINFO_PANELLID, "Team Info", teamInfo);
     }
 
     void refreshOrCreateMatchLog(MatchLog matchLog) {
-        gameUIGenerator.createOrUpdateTextPanel("matchLog", "Match Log", matchLog.toString());
+        gameUIGenerator.createOrUpdateTextPanel(MATCHLOG_PANELID, "Match Log", matchLog.toString());
     }   
 
     void refreshOrCreatePlayerInfo() {
-        gameUIGenerator.createOrUpdateTextPanel("playerInfo", "Player Info", flattenListString(game.getActivePlayers()));
+        gameUIGenerator.createOrUpdateTextPanel(PLAYERINFO_PANELLID, "Player Info", Player.toStringHeaders() + "\n" + flattenListString(game.getActivePlayers()));
     }
+
 }

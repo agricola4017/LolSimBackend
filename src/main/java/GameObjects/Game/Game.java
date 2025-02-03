@@ -238,13 +238,13 @@ public class Game {
         int j = 1;
         for (int i = 0; i < standings.size(); i++) {
             Standing standing = standings.get(i);
-            String standingOutput = j + ". " + standing + " (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " , Prev. Seasons ";
+            String standingOutput = j + ". " + standing + " (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " | Prev. ";
             if (oldStandings != null) {
                 standingOutput += oldStandings.get(i);
             } else {
                 standingOutput += "0-0";
             }
-            ret += standingOutput + ", teamID: " + standing.getTeam().getTeamID() + "\n";
+            ret += standingOutput + " | TID:" + standing.getTeam().getTeamID() + "\n";
             j++;
         }
         ret += "OVR Standings\n";
@@ -354,23 +354,37 @@ public class Game {
     void adjustPlayerStats() {
         for (Player player : activePlayers) {
             int age = player.getAge();
-            player.setAge(age + 1);
             int improvementChance = 0;
             int declineChance = 0;
         
-            if (age < 17) {
-                improvementChance = 80; // Very high chance for ages below 17
-                declineChance = 10;
+            if (age <= 17) {
+                //ranges 17 to 19
+                improvementChance = 60; // Very high chance for ages below 17
+                declineChance = 30;
             } else if (age <= 20) {
-                improvementChance = 70 - ((age - 17) * 10);
-                declineChance = 20 + ((age - 17) * 5);
+                //ranges 20 to 24 
+                //improve is 50 to 42
+                //decline is 30 to 34
+                improvementChance = 50 - ((age - 20) * 2);
+                declineChance = 30 + ((age - 20) * 1);
             } else if (age <= 25) {
-                improvementChance = 50 - ((age - 20) * 10);
-                declineChance = 30 + ((age - 20) * 5);
+                //ranges 25 to 29
+                //improve is 40 to 32
+                //decline is 30 to 32
+                improvementChance = 40 - ((age - 25) * 2);
+                declineChance = (int)Math.round(30 + ((age - 25) * 0.5));
             } else if (age <= 30) {
-                improvementChance = 30 - ((age - 25) * 5);
-                declineChance = 50 + ((age - 25) * 10);
+                //ranges 30 to 34
+                //improve is 30 to 26
+                //decline is 24 to 26
+                improvementChance = 30 - ((age - 30) * 1);
+                declineChance = 24 + (int)Math.round(((age - 30) * 0.5));
+            } else {
+                improvementChance = 15;
+                declineChance = 18;
             }
+
+            player.setAge(age + 1);
             
             player.changeStats(improvementChance, declineChance);
 

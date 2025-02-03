@@ -97,14 +97,15 @@ public class MatchLogTeamStat {
         String ret = "";
         
         ret += team.getTeamName() + "\n";
+        ret += "Position | KDA | CS | GOLD | OVR\n";
         for (Map.Entry<Position, Player> positionToPlayer : positionToPlayerMap.entrySet()) {
             Player player = positionToPlayer.getValue();
             Position position = positionToPlayer.getKey();
             MatchLogPlayerStat matchLogPlayerStat = playerToPlayerStatMap.get(player);
-            ret += position + " - " + player.getPlayerName() + " | ";
-            ret += "KDA: " + matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths() + " ";
-            ret += "CS: " + matchLogPlayerStat.getCs() + " " + "Gold: " + matchLogPlayerStat.getGold();
-            ret += " | OVR: " + player.getStat().getOVR();
+            ret += position + " | " + player.getPlayerName() + " | ";
+            ret += matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths() + " | ";
+            ret +=  matchLogPlayerStat.getCs()+ " | " + matchLogPlayerStat.getGold();
+            ret += " | " + player.getStat().getOVR() + "/" + player.getStat().getPotential();
             ret += "\n";
         }
         return ret;

@@ -19,11 +19,13 @@ public class Player implements Serializable {
     //test val
     public static int counter = 0;
 
-    int kills = 0;
-    int deaths = 0;
-    int cs = 0;
-    int gold = 0;
-    int gamesPlayed = 0;
+    private int kills = 0;
+    private int deaths = 0;
+    private int cs = 0;
+    private int gold = 0;
+    private int gamesPlayed = 0;
+
+    private int[] seasonalChange = new int[] {0,0};
 
     //generate random player
     public Player() {
@@ -134,7 +136,11 @@ public class Player implements Serializable {
     }
 
     public void changeStats(int improvementChance, int declineChance) {
+        int temp = this.stat.getOVR();
+        int temp2 = this.stat.getPotential();
         this.stat.changeStats(improvementChance, declineChance);
+        seasonalChange[0] =this.stat.getOVR() - temp;
+        seasonalChange[1] =this.stat.getPotential() - temp2;
     }
 
     public int getPlayerID() {
@@ -211,16 +217,23 @@ public class Player implements Serializable {
         if (gamesPlayed == 0) { 
             gp = 1;
         }
-        return "playerID=" + playerID +  
-                ", playerName='" + playerName + '\'' +
-                ", age=" + age +
-                ", teamID=" + teamID +
-                ", position=" + position +
+        return playerID +  
+                " | " + playerName +
+                " | "+ age +
+                " | "+ position +
                 //", value=" + value +
                 //", stat=" + stat +
                 //", region=" + region +
-                ", OVR= " + stat.getOVR() + 
-                ", KDA=" + kills/gp + "/" + deaths/gp +
-                ", CS=" + cs/gp + " " + ",Gold=" + gold/gp;
+                " | " + stat.getOVR() + 
+                "/" + stat.getPotential() + 
+                "(" + (seasonalChange[0]>=0 ? "+" : "") + seasonalChange[0] + 
+                "/" + (seasonalChange[1]>=0 ? "+" : "") + seasonalChange[1] + ")" +
+
+                " | " + kills/gp + "/" + deaths/gp +
+                " | " + cs/gp + " " + " | " + gold/gp;
+    }
+    
+    public static String toStringHeaders() {
+        return "ID | Name | Age | main | Position | OVR/POT | KDA | CS/Gold";
     }
 }

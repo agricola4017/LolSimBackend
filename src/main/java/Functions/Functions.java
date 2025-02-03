@@ -30,13 +30,16 @@ public class Functions {
         // Scale the random value to the desired range
         int result;
     
-        if (randomValue < 0.9) { // 80% of the time use slow growth
+        if (randomValue <= 0.7) { // 80% of the time use slow growth
             // Slow growth: Linear scaling for the lower 80%
-            result = (int) (min +  Math.log(1+randomValue) * (max - min));
-        } else { // 20% of the time use fast growth
+            result = (int) ((0.35 * (min + Math.log(1+randomValue) * (max - min))));
+        } else if (randomValue < 0.98) {
+            result = (int) (0.65 * (min +  Math.log(1+randomValue*randomNumberCustom(1,2)) * (max - min)));
+        }
+        else { // 20% of the time use fast growth
             // Fast growth: Exponential scaling for the upper 20%
-            double fastGrowthValue = Math.pow(randomValue, 2); // Exponential growth
-            result = (int) (min + (0.8 + fastGrowthValue * 0.2) * (max - min));
+            double minResult = (int)(0.75 * (max-min) + min);
+            result = (int) (minResult + (int)(Math.random() * 0.25*(max-min)));
         }
     
         // Ensure the result is within the specified min and max

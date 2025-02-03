@@ -81,6 +81,6 @@ public class Standing implements Comparable<Standing>, Serializable {
             }
         }
         return team.getTeamName() + ": " + wins + "-" + (losses) + " | " +(wins+losses) 
-        + "| Last 5: " + last5Wins + "-" + (last5.size() - last5Wins);
+            + last5Wins + "-" + (last5.size() - last5Wins);
     }
 }
