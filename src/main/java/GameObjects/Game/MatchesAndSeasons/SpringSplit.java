@@ -1,15 +1,18 @@
 package GameObjects.Game.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
+
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.Deque;
 
 
 public class SpringSplit extends Season {
-    private Queue<Match> matchesToBePlayed;
+    private Deque<Match> matchesToBePlayed;
     private int oneSetCount;
+    private Team winner;
+    private List<Team> teams;
 
     private final static String name = "Spring Split";
 
@@ -20,7 +23,8 @@ public class SpringSplit extends Season {
      */
     public SpringSplit(List<Team> teams) {
         this.oneSetCount = teams.size()/2;
-        this.matchesToBePlayed = new LinkedList<>();
+        this.matchesToBePlayed = new ArrayDeque<>();
+        this.teams = teams;
 
         /**
          * rotating algorithm for round robin
@@ -74,11 +78,11 @@ public class SpringSplit extends Season {
         }
     }
 
-    public Queue<Match> getMatchesToBePlayed() {
+    public Deque<Match> getMatchesToBePlayed() {
         return matchesToBePlayed;
     }
 
-    public void setMatchesToBePlayed(Queue<Match> matchesToBePlayed) {
+    public void setMatchesToBePlayed(Deque<Match> matchesToBePlayed) {
         this.matchesToBePlayed = matchesToBePlayed;
     }
 
@@ -108,4 +112,12 @@ public class SpringSplit extends Season {
         return new SpringSplit(teams);
     }
 
+    public Team getWinner() {
+        return winner;
+    }   
+
+    public Season generateNextSeason(List<Team> teams) {
+        teams = teams.subList(0, Math.min(6, teams.size()));
+        return new SpringPlayoffs(teams);
+    }
 }

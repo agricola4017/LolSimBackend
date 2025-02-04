@@ -4,7 +4,7 @@ import GameObjects.TeamsAndPlayers.Team;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Queue;
+import java.util.Deque;
 
 public abstract class Season implements Serializable{ 
     
@@ -46,11 +46,13 @@ public abstract class Season implements Serializable{
      * calculate stats, mvp, HoF
      */
 
-    private Queue<Match> matchesToBePlayed;
+    private Deque<Match> matchesToBePlayed;
 
     //how many matches played in one set
     private int oneSetCount;
     private String name;
+    private Team winner;
+    
     public Match playMatch() {
         Match match = matchesToBePlayed.poll();
         match.playMatch();
@@ -62,8 +64,11 @@ public abstract class Season implements Serializable{
 
     public abstract boolean isFinished();
 
-    public abstract Queue<Match> getMatchesToBePlayed();
+    public abstract Deque<Match> getMatchesToBePlayed();
 
     public abstract Season newInstance(List<Team> teams);
 
+    public abstract Team getWinner();
+
+    public abstract Season generateNextSeason(List<Team> teams);
 }

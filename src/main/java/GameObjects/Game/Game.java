@@ -7,6 +7,7 @@ import GameObjects.Game.MatchesAndSeasons.SpringSplit;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Standing;
 import GameObjects.TeamsAndPlayers.Team;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
@@ -153,7 +154,7 @@ public class Game {
     void loadGameWithSeasonsConfig() throws InterruptedException {
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
         
-        Season springSplit = new SpringSplit(new ArrayList<>(teams));
+        Season springSplit = new SpringSplit(teams);
         seasonsToPlay.add(springSplit);
     }
 
@@ -210,10 +211,11 @@ public class Game {
         }
 
         cleanupLeague();
-        seasonsToPlay.add(new SpringSplit(teams));
         adjustPlayerStats();
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
-        seasonsToPlay.poll();
+        Season season = seasonsToPlay.poll();
+        List<Team> teams = oldStandings.stream().map(Standing::getTeam).collect(Collectors.toList());
+        seasonsToPlay.add(season.generateNextSeason(teams));
         //cleanActionListeners();
     }
 
