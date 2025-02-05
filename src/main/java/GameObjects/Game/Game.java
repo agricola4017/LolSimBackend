@@ -215,6 +215,7 @@ public class Game {
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
         Season season = seasonsToPlay.poll();
         List<Team> teams = oldStandings.stream().map(Standing::getTeam).collect(Collectors.toList());
+        //teams.stream().forEach(team -> System.out.println(team.getTeamName()));
         seasonsToPlay.add(season.generateNextSeason(teams));
         //cleanActionListeners();
     }
@@ -240,7 +241,7 @@ public class Game {
         int j = 1;
         for (int i = 0; i < standings.size(); i++) {
             Standing standing = standings.get(i);
-            String standingOutput = j + ". " + standing + " (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " | Prev. ";
+            String standingOutput = j + ". " + standing + " | (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " | Prev. ";
             if (oldStandings != null) {
                 standingOutput += oldStandings.get(i);
             } else {
@@ -314,6 +315,8 @@ public class Game {
                 count++;
             }
         }
+        System.out.println("Season finished");
+        System.out.println(currentSeason.getWinner().getTeamName() + " won the season!");
         return matchLog;
     }
 

@@ -13,8 +13,8 @@ import java.util.HashSet;
 public class SpringPlayoffs extends Season {
     private Deque<Match> matchesToBePlayed;
     private int oneSetCount;
-    private Set<Team> winnersBracket;
-    private Set<Team> losersBracket;
+    private List<Team> winnersBracket;
+    private List<Team> losersBracket;
     private List<Team> teams;
 
     private final static String name = "Spring Playoffs";
@@ -40,8 +40,8 @@ public class SpringPlayoffs extends Season {
     public SpringPlayoffs(List<Team> teams) {
         this.oneSetCount = teams.size()/2;
         this.matchesToBePlayed = new LinkedList<>();
-        this.winnersBracket = new HashSet<>(teams);
-        this.losersBracket = new HashSet<>();
+        this.winnersBracket = new ArrayList<>(teams);
+        this.losersBracket = new ArrayList<>();
         this.teams = teams;
         if (teams.size() != 6) {
             System.out.println("Warning: not enough teams for playoffs. Using a subset of teams.");
@@ -191,7 +191,9 @@ public class SpringPlayoffs extends Season {
 
     public boolean isFinished() {
         Boolean isFinished = teams.size() == 1;
+        //System.out.println("isFinished: " + isFinished);
         if (isFinished) {
+            //System.out.println("Winner of Playoffs is: " + winner.getTeamName());
             winner = teams.get(0);
         }
         return isFinished;

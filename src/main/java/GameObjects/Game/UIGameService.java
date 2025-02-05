@@ -78,7 +78,7 @@ public class UIGameService {
                 MatchLog matchLog = game.playSeason(currentSeason);
                 
                 refreshOrCreateTeamInfo();
-                refreshOrCreateStandings();
+                refreshOrCreateStandings(currentSeason);
                 if (matchLog != null)
                     refreshOrCreateMatchLog(matchLog);
                 try {
@@ -103,7 +103,7 @@ public class UIGameService {
                 if (matchLog != null) {
                     refreshOrCreateMatchLog(matchLog);
                     // Also update standings after each game
-                    refreshOrCreateStandings();
+                    refreshOrCreateStandings(currentSeason);
                     refreshOrCreateTeamInfo();
                 }
                 try {
@@ -137,7 +137,7 @@ public class UIGameService {
                     refreshOrCreateMatchLog(matchLog);
                 }    
                 // Also update standings after each game
-                refreshOrCreateStandings();
+                refreshOrCreateStandings(currentSeason);
                 refreshOrCreateTeamInfo();
 
                 try {
@@ -159,7 +159,7 @@ public class UIGameService {
         ActionListener seeStandingsListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                refreshOrCreateStandings();
+                refreshOrCreateStandings(game.getSeasonsToPlay().peek());
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -309,7 +309,7 @@ public class UIGameService {
                     System.out.println("Error loading game: " + ex.getMessage());
                 } 
                     // Also update standings after each game
-                refreshOrCreateStandings();
+                refreshOrCreateStandings(game.getSeasonsToPlay().peek());
                 refreshOrCreateTeamInfo();
             }
         };
@@ -317,9 +317,11 @@ public class UIGameService {
         buttonToActionListenerMap.put(loadGameButton, loadGameListener);
     }
 
-    void refreshOrCreateStandings() {
+    void refreshOrCreateStandings(Season currentSeason) {
+        String winner = "";
+        winner = currentSeason != null && currentSeason.isFinished() ? currentSeason.getName() + " Winner: " + currentSeason.getWinner().getTeamName() : currentSeason.getName() + " is in progress";
         gameUIGenerator.createOrUpdateTextPanel(STANDINGS_PANELID, "Standings", 
-            game.getSeasonsToPlay().peek().getName() + "\n" + game.standingsToString());
+            winner + "\n" + game.standingsToString());
     }
 
     void refreshOrCreateTeamInfo() {
