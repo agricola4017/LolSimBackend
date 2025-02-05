@@ -274,9 +274,6 @@ public class UIGameService {
                     oos.writeObject(game.getActivePlayers());
                     oos.writeObject(game.getTeamIDtoTeamMap());
                     oos.writeObject(game.getPlayerIDtoPlayerMap());
-                    oos.writeObject(game.getStandings());
-                    oos.writeObject(game.getOldStandings());
-                    oos.writeObject(game.getTeamToStandingMap());
                     oos.writeObject(game.getPlayingTeam());
                 } catch (IOException ex) {
                     System.out.println("Error saving game :" + ex.getMessage());
@@ -300,11 +297,8 @@ public class UIGameService {
                     List<Player> activePlayers = (List<Player>) ois.readObject();
                     Map<Integer, Team> teamIDtoTeamMap = (Map<Integer, Team>) ois.readObject();
                     Map<Integer, Player> playerIDtoPlayerMap = (Map<Integer, Player>) ois.readObject();
-                    List<Standing> standings = (List<Standing>) ois.readObject();
-                    List<Standing> oldStandings = (List<Standing>) ois.readObject();
-                    Map<Team, Standing> teamToStandingMap = (Map<Team, Standing>) ois.readObject();
                     Team playingTeam = (Team) ois.readObject();
-                    game.loadGame(gameIsRunning, seasonsToPlay, teams, activePlayers, teamIDtoTeamMap, playerIDtoPlayerMap, standings, oldStandings, teamToStandingMap, playingTeam);
+                    game.loadGame(gameIsRunning, seasonsToPlay, teams, activePlayers, teamIDtoTeamMap, playerIDtoPlayerMap, playingTeam);
                 } catch (IOException | ClassNotFoundException ex) {
                     System.out.println("Error loading game: " + ex.getMessage());
                 } 
@@ -321,13 +315,13 @@ public class UIGameService {
         String winner = "";
         winner = currentSeason != null && currentSeason.isFinished() ? currentSeason.getName() + " Winner: " + currentSeason.getWinner().getTeamName() : currentSeason.getName() + " is in progress";
         gameUIGenerator.createOrUpdateTextPanel(STANDINGS_PANELID, "Standings", 
-            winner + "\n" + game.standingsToString());
+            winner + "\n" + game.getCurrentSeason().toString());
     }
 
     void refreshOrCreateTeamInfo() {
-        Map<Team, Standing> teamToStandingMap = game.getTeamToStandingMap();
         Team playingTeam = game.getPlayingTeam();
-        String teamInfo = teamToStandingMap.get(playingTeam).toString() + "\n" + playingTeam.toString();
+        Standing standing = game.getCurrentSeason().getStanding(playingTeam);
+        String teamInfo = standing.toString() + "\n" + playingTeam.toString();
         gameUIGenerator.createOrUpdateTextPanel(TEAMINFO_PANELLID, "Team Info", teamInfo);
     }
 

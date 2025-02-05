@@ -45,7 +45,7 @@ public class testMatch {
         int t1win = 0;
         int t2win = 0;
         for (int i = 0; i < 1000; i++) {
-            Match a = new Match(teams.get(0), teams.get(1), 1);
+            Match a = new Match(teams.get(0), teams.get(1));
             a.playMatch();
             if (a.getMatchLog().getWinner() == teams.get(0)) {
                 t1win++;

@@ -11,14 +11,13 @@ import java.util.Map;
 import static Functions.Functions.rollPercentile;
 
 public class Match extends MatchAbstract {
-    private Team[] teams;
-    private int matches;
+    private final Team[] teams;
     private MatchLog matchLog;
-    public Match(Team team1, Team team2, int matches) {
+    
+    public Match(Team team1, Team team2) {
         this.teams = new Team[2];
         this.teams[0] = team1;
         this.teams[1] = team2;
-        this.matches = matches;
     }
 
     private int waveValue(int economy) {
@@ -185,29 +184,21 @@ public class Match extends MatchAbstract {
         return teams;
     }
 
-    public void setTeams(Team[] teams) {
-        this.teams = teams;
-    }
-
-    public int getMatches() {
-        return matches;
-    }
-
-    public void setMatches(int matches) {
-        this.matches = matches;
-    }
-
     public MatchLog getMatchLog() {
         return matchLog;
     }
 
-    public void setMatchLog(MatchLog matchLog) {
-        this.matchLog = matchLog;
+    public Team getWinner() {
+        return matchLog.getWinner();
+    }
+
+    public Team getLoser() {
+        return matchLog.getLoser();
     }
 
     @Override
     public String toString() {
-        return teams[0].getTeamName() + ", " + teams[0].getPlayerRoster().getOVR() + " vs " + teams[1].getTeamName() + ", " + teams[1].getPlayerRoster().getOVR() + " for " + matches + " matches, winner is " + matchLog.getWinner().getTeamName();
+        return teams[0].getTeamName() + ", " + teams[0].getPlayerRoster().getOVR() + " vs " + teams[1].getTeamName() + ", " + teams[1].getPlayerRoster().getOVR() + ", winner is " + matchLog.getWinner().getTeamName();
     }
 
 
