@@ -95,8 +95,12 @@ public class SpringSplit extends Season {
     } 
 
     public Season generateNextSeason(List<Team> teams) {
-        teams = teams.subList(0, Math.min(6, teams.size()));
-        return new SpringPlayoffs(teams, super.getStandings());
+        //teams = teams.subList(0, Math.min(6, teams.size()));
+        List<Team> sublist = new ArrayList<>();
+        for (int i = 0; i < teams.size() && i < 6; i++) {
+            sublist.add(teams.get(i));
+        }
+        return new SpringPlayoffs(sublist, super.getStandings());
     }
 
     @Override
@@ -107,7 +111,7 @@ public class SpringSplit extends Season {
         for (int i = 0; i < super.getStandings().size(); i++) {
             Standing standing = super.getStandings().get(i);
             String standingOutput = j + ". " + standing + " | (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " | Prev. ";
-            if (super.getOldStandings() != null && !super.getOldStandings().isEmpty()) {
+            if (super.getOldStandings() != null && !super.getOldStandings().isEmpty() && i < super.getOldStandings().size()) {
                 standingOutput += super.getOldStandings().get(i);
             } else {
                 standingOutput += "0-0";

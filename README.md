@@ -11,5 +11,5 @@ TODO for next updates:
       -- standing string may be complicated
          -- how to get order of standings for playoffs? (Order elimination time)
       -- how to determine new standings from old standings for playoffs
---match log should have position seed 
+--match log should have position seed, should also be in standings string 
 -- need to do lots of testing after refactoring

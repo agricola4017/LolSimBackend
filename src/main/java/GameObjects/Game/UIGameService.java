@@ -21,8 +21,10 @@ import static Functions.Functions.flattenListString;
 import java.awt.event.ActionEvent;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JButton;
 
@@ -275,8 +277,10 @@ public class UIGameService {
                     oos.writeObject(game.getTeamIDtoTeamMap());
                     oos.writeObject(game.getPlayerIDtoPlayerMap());
                     oos.writeObject(game.getPlayingTeam());
+
+                    System.out.println("Game successfully saved");
                 } catch (IOException ex) {
-                    System.out.println("Error saving game :" + ex.getMessage());
+                    System.out.println("Error saving game :" + ex.getMessage() + ex.getStackTrace());
                 }
             }
         };
@@ -299,6 +303,7 @@ public class UIGameService {
                     Map<Integer, Player> playerIDtoPlayerMap = (Map<Integer, Player>) ois.readObject();
                     Team playingTeam = (Team) ois.readObject();
                     game.loadGame(gameIsRunning, seasonsToPlay, teams, activePlayers, teamIDtoTeamMap, playerIDtoPlayerMap, playingTeam);
+                    System.out.println("Game Successfully Loaded");
                 } catch (IOException | ClassNotFoundException ex) {
                     System.out.println("Error loading game: " + ex.getMessage());
                 } 
