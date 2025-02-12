@@ -321,8 +321,16 @@ public class UIGameService {
     void refreshOrCreateTeamInfo() {
         Team playingTeam = game.getPlayingTeam();
         Standing standing = game.getCurrentSeason().getStanding(playingTeam);
-        String teamInfo = standing.toString() + "\n" + playingTeam.toString();
-        gameUIGenerator.createOrUpdateTextPanel(TEAMINFO_PANELLID, "Team Info", teamInfo);
+        String teaminfo;
+
+        //if didn't make playoffs
+        if (standing == null) {
+            teaminfo = playingTeam.toString();
+        }
+        else {
+            teaminfo = standing.toString() + "\n" + playingTeam.toString();
+        }
+        gameUIGenerator.createOrUpdateTextPanel(TEAMINFO_PANELLID, "Team Info", teaminfo);
     }
 
     void refreshOrCreateMatchLog(MatchLog matchLog) {

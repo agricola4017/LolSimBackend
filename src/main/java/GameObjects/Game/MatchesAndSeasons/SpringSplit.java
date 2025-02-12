@@ -18,13 +18,13 @@ public class SpringSplit extends Season {
     private final static String name = "Spring Split";
 
     public SpringSplit(List<Team> teams) {
-        super(teams);
+        super(teams, name);
 
         setupMatches();
     }
 
     public SpringSplit(List<Team> teams, List<Standing> oldStandings) {
-        super(teams, oldStandings);
+        super(teams, oldStandings, name);
 
         setupMatches();
     }
@@ -89,14 +89,14 @@ public class SpringSplit extends Season {
     public boolean isFinished() {
         Boolean isFinished = super.isSeriesToBePlayedEmptyAndNotNull();
         if (isFinished) {
-            super.setWinner(super.getTeams().get(0));  
+            super.setWinner(super.getStandings().get(0).getTeam());
         }
         return isFinished;
     } 
 
     public Season generateNextSeason(List<Team> teams) {
         teams = teams.subList(0, Math.min(6, teams.size()));
-        return new SpringPlayoffs(teams, super.getOldStandings());
+        return new SpringPlayoffs(teams, super.getStandings());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SpringSplit extends Season {
         for (int i = 0; i < super.getStandings().size(); i++) {
             Standing standing = super.getStandings().get(i);
             String standingOutput = j + ". " + standing + " | (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " | Prev. ";
-            if (super.getOldStandings() != null) {
+            if (super.getOldStandings() != null && !super.getOldStandings().isEmpty()) {
                 standingOutput += super.getOldStandings().get(i);
             } else {
                 standingOutput += "0-0";

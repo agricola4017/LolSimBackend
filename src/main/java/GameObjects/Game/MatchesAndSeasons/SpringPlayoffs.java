@@ -23,16 +23,22 @@ public class SpringPlayoffs extends Season {
     private final static String name = "Spring Playoffs";
 
     public SpringPlayoffs(List<Team> teams) {
-        super(teams);
+        super(teams, name);
         playingTeams = new HashSet<>(teams);
+
+        
+        this.winnersBracket = new ArrayList<>(this.playingTeams);
+        this.losersBracket = new ArrayList<>();
+        setupMatches();
     }
 
     public SpringPlayoffs(List<Team> teams, List<Standing> oldStandings) {
-        super(teams, oldStandings);
+        super(teams, oldStandings, name);
         playingTeams = new HashSet<>(teams);
-
+        
+        this.winnersBracket = new ArrayList<>(this.playingTeams);
+        this.losersBracket = new ArrayList<>();
         setupMatches();
-
     }
 
     /**
@@ -42,33 +48,30 @@ public class SpringPlayoffs extends Season {
      * If a match cannot be created due to an odd number of teams, a bye will be created (NOT YET IMPLEMENTED)
      * if only two teams remain, a grand finals match will be created
      */
-    public void setupMatches() {
+    private void setupMatches() {
         //assume teams is even and > 2, if odd incorporate bye (But skip for now)
-
-        List<Team> winnersBracketList = new ArrayList<>(winnersBracket);
-        List<Team> losersBracketList = new ArrayList<>(losersBracket);
 
         if (this.playingTeams.size() != 2) { 
             
-            for (int i = 0; i < winnersBracketList.size()/2; i++) {
-                Team one = winnersBracketList.get(i);
-                Team two = winnersBracketList.get(winnersBracketList.size()-i-1);
+            for (int i = 0; i < winnersBracket.size()/2; i++) {
+                Team one = winnersBracket.get(i);
+                Team two = winnersBracket.get(winnersBracket.size()-i-1);
                 super.addSeries(new Series(new Team[] {one, two}, REGULAR_SERIES_LENGTH));
                 //System.out.println("matches added: " + one.getTeamName() + " vs " + two.getTeamName() + " matches: " + seriesLength + " winPoint: " + winPoint);
             }
 
-            for (int i = 0; i < losersBracketList.size()/2; i++) {
-                Team one = losersBracketList.get(i);
-                Team two = losersBracketList.get(losersBracketList.size()-i-1);
+            for (int i = 0; i < losersBracket.size()/2; i++) {
+                Team one = losersBracket.get(i);
+                Team two = losersBracket.get(losersBracket.size()-i-1);
                 super.addSeries(new Series(new Team[] {one, two}, ELIMINATION_SERIES_LENGTH));
                 //System.out.println("matches added: " + one.getTeamName() + " vs " + two.getTeamName() + " matches: " + seriesLength + " winPoint: " + winPoint);
             }
         } else {
             //Matches the last game of the seasons, grand finals 
-            if (winnersBracketList.isEmpty()) {
-                super.addSeries(new Series(new Team[] {losersBracketList.get(0), losersBracketList.get(1)}, ELIMINATION_SERIES_LENGTH));
+            if (winnersBracket.isEmpty()) {
+                super.addSeries(new Series(new Team[] {losersBracket.get(0), losersBracket.get(1)}, ELIMINATION_SERIES_LENGTH));
             } else {
-                super.addSeries(new Series(new Team[] {winnersBracketList.get(0), losersBracketList.get(0)}, ELIMINATION_SERIES_LENGTH));
+                super.addSeries(new Series(new Team[] {winnersBracket.get(0), losersBracket.get(0)}, ELIMINATION_SERIES_LENGTH));
             }
         }
     }
@@ -99,6 +102,8 @@ public class SpringPlayoffs extends Season {
                 this.playingTeams.remove(loser);
             }
 
+            super.updateStandings(series.getWinner(), loser);
+
             super.pollSeriesToBePlayed();
         }
 
@@ -120,7 +125,7 @@ public class SpringPlayoffs extends Season {
     }
 
     public Season generateNextSeason(List<Team> teams) {
-        return new SpringSplit(teams, super.getOldStandings());
+        return new SpringSplit(teams, super.getStandings());
     }
 
     @Override
@@ -128,6 +133,18 @@ public class SpringPlayoffs extends Season {
      * Should implement playoffs custom string
      */
     public String toString() {
-        return super.toString();
+        String ret = super.toString();
+        ret += "\n";
+
+        ret+= "Winners Bracket: \n";
+        for (Team team: winnersBracket) {
+            ret += team.getTeamName() + "\n";
+        }
+
+        ret+= "Losers Bracket: \n";
+        for (Team team: losersBracket) {
+            ret += team.getTeamName() + "\n";
+        }
+        return ret;
     }
 }

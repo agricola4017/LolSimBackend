@@ -71,13 +71,26 @@ public class Standing implements Comparable<Standing>, Serializable {
 
     @Override
     public String toString() {
+        // Logging the state of the team and its players
+        /**00 
+        if (team == null) {
+            System.out.println("Standing: team is null");
+        } else {
+            System.out.println("Standing: team name = " + team.getTeamName());
+            if (team.getPlayerRoster() == null) {
+                System.out.println("Standing: playerRoster is null");
+            } else {
+                System.out.println("Standing: playerRoster is initialized");
+            }
+        }
+        **/
         int last5Wins = 0;
         for (Boolean b : last5) {
             if (b) {
                 last5Wins++;
             }
         }
-        return team.getTeamName() + ": " + wins + "-" + (losses) + " | " + (wins+losses) 
+        return team.getTeamName() + ": " + wins + "-" + (losses) + " | " + (wins + losses)
             + " | " + last5Wins + "-" + (last5.size() - last5Wins);
     }
 }

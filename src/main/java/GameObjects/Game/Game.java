@@ -212,7 +212,6 @@ public class Game {
         
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
         Season season = seasonsToPlay.poll();
-        repopulateTeamInOrderOfStandings(currentSeason);
         seasonsToPlay.add(season.generateNextSeason(teams));
         //cleanActionListeners();
     }

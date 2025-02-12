@@ -71,27 +71,27 @@ public abstract class Season implements Serializable {
     
     private Team winner;
 
-    protected Season(List<Team> teams) {
+    protected Season(List<Team> teams, String name) {
         this.teams = teams;
         this.oneSetCount = teams.size()/2;
         this.seriesToBePlayed = new ArrayDeque<>();
         this.standings = new ArrayList<>();
         this.teamToStandingMap = new HashMap<>();
         this.oldStandings = new ArrayList<>();
-        this.name = "Season";
+        this.name = name;
         this.winner = null;
 
         initStandings();
     }
 
-    protected Season(List<Team> teams, List<Standing> oldStandings) {
+    protected Season(List<Team> teams, List<Standing> oldStandings, String name) {
         this.teams = teams;
         this.oneSetCount = teams.size()/2;
         this.seriesToBePlayed = new ArrayDeque<>();
         this.standings = new ArrayList<>();
         this.teamToStandingMap = new HashMap<>();
         this.oldStandings = oldStandings;
-        this.name = "Season";
+        this.name = name;
         this.winner = null;
 
         initStandings();
@@ -104,19 +104,18 @@ public abstract class Season implements Serializable {
      */
     public Match playMatch() {
         Series series = seriesToBePlayed.peek();
+        Match match = series.playMatch();
+        updateStandings(match.getWinner(), match.getLoser());
         if (series.isFinished()) {
             seriesToBePlayed.poll();
         }
-        series = seriesToBePlayed.peek();
-        Match match = series.pollMatch();
-        for (Team team : match.getTeams()) {
-            team.normalizePlayers();
-        }
-        match.playMatch();
-        teamToStandingMap.get(match.getWinner()).wonGame();
-        teamToStandingMap.get(match.getLoser()).lostGame();
-        Collections.sort(this.standings);
         return match;
+    }
+
+    protected void updateStandings(Team winner, Team loser) {
+        teamToStandingMap.get(winner).wonGame();
+        teamToStandingMap.get(loser).lostGame();
+        Collections.sort(this.standings);
     }
 
     public abstract boolean isFinished();
@@ -189,7 +188,8 @@ public abstract class Season implements Serializable {
     /**
      * Initializes the standings based on the teams in the league
      */
-    public void initStandings() {
+    private void initStandings() {
+        System.out.println("Initializing standings");
         for (int i = 0; i < this.teams.size(); i++) {
             Standing standing = new Standing(teams.get(i));
             this.standings.add(standing);
@@ -197,6 +197,10 @@ public abstract class Season implements Serializable {
         }
     }
 
+    /**
+     * Sorts the standings, records the placements 
+     * @param splitCount
+     */
     public void postSeasonCleanup(int splitCount) {
         Collections.sort(standings);
 
@@ -220,7 +224,7 @@ public abstract class Season implements Serializable {
         for (int i = 0; i < this.standings.size(); i++) {
             Standing standing = this.standings.get(i);
             String standingOutput = j + ". " + standing + " | (OVR:" + standing.getTeam().getPlayerRoster().getOVR() + ")" + " | Prev. ";
-            if (this.oldStandings != null) {
+            if (this.oldStandings != null && !this.oldStandings.isEmpty()) {
                 standingOutput += this.oldStandings.get(i);
             } else {
                 standingOutput += "0-0";
