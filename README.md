@@ -1,5 +1,9 @@
 java backend for lolsim work in progress
 
+how to run atm, copy into eclipse
+run main method of GameRunner.java class
+will provide docker/jar setup later
+
 TODO for next updates:
 - keep iterating growth function with more data 
 - AI signing stage, seasonal player generation 
