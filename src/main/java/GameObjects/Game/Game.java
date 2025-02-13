@@ -4,10 +4,10 @@ import GameObjects.Game.MatchesAndSeasons.Match;
 import GameObjects.Game.MatchesAndSeasons.MatchLog;
 import GameObjects.Game.MatchesAndSeasons.Season;
 import GameObjects.Game.MatchesAndSeasons.SpringSplit;
+import GameObjects.Game.MatchesAndSeasons.SpringPlayoffs;
 import GameObjects.TeamsAndPlayers.Player;
-import GameObjects.TeamsAndPlayers.Standing;
 import GameObjects.TeamsAndPlayers.Team;
-import java.util.stream.Collectors;
+import GameObjects.Game.History.History;
 
 import javax.swing.*;
 
@@ -41,6 +41,10 @@ public class Game {
 
     private Team playingTeam;
 
+    private History history;
+
+    private Season currentSeason;
+
     public Game() {
         this.activePlayers = new ArrayList<>();
         this.teams = new ArrayList<>();
@@ -48,7 +52,6 @@ public class Game {
         this.playerIDtoPlayerMap = new HashMap<>();
         this.latch = new CountDownLatch(0);
         this.gameIsRunning = true;
-
         //would be cool if you could force a load if you did this constructor, maybe a factory is necessary for this
     }
 
@@ -59,9 +62,6 @@ public class Game {
 
         this.teams = new ArrayList<>(teamIDtoTeamMap.values());
         this.activePlayers = new ArrayList<>(playerIDtoPlayerMap.values());
-
-        this.latch = new CountDownLatch(0);
-        this.gameIsRunning = true;
     }
 
     public void loadGame(boolean gameIsRunning, Queue<Season> seasonsToPlay, List<Team> teams, List<Player> activePlayers, 
@@ -74,6 +74,9 @@ public class Game {
         this.teamIDtoTeamMap = teamIDtoTeamMap;
         this.playerIDtoPlayerMap = playerIDtoPlayerMap;
         this.playingTeam = playingTeam;
+        this.history = new History(1);
+
+        this.currentSeason = seasonsToPlay.peek();
     }
 
     //getters and setters
@@ -125,6 +128,10 @@ public class Game {
     boolean getGameIsRunning() {
         return gameIsRunning;
     }
+
+    History getHistory() {
+        return history;
+    }
     /**
      * After game data has been loaded or initialized, this method is called to start the first season of the game.
      * It should be expected that in future development, there will be more types of seasons and progressions.
@@ -145,15 +152,21 @@ public class Game {
      */
     void playGame() throws InterruptedException{
         int splitCount = 1;
+
+        this.latch = new CountDownLatch(0);
+        this.gameIsRunning = true;
+        this.history = new History(splitCount);
         
         while(gameIsRunning) {
-            Season currentSeason = prepareNewSeason(splitCount);
-
+            currentSeason = prepareNewSeason(splitCount);
+            
             latch = new CountDownLatch(1);
             latch.await();
 
             postSeasonCleanup(splitCount, currentSeason);
-            splitCount++;
+            if (currentSeason instanceof SpringPlayoffs) {
+                splitCount++;
+            }
             gameIsRunning = !seasonsToPlay.isEmpty();
         }
     }
@@ -211,6 +224,7 @@ public class Game {
         adjustPlayerStats();
         
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
+        history.recordSeason(currentSeason);
         Season season = seasonsToPlay.poll();
         seasonsToPlay.add(season.generateNextSeason(teams));
         //cleanActionListeners();

@@ -172,7 +172,7 @@ public class GameUIGenerator {
         JFrame frame = new JFrame(title);
         activeFrames.put(identifier, frame);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(300, 200);
+        frame.setSize(300, 400);
         frame.setLayout(new FlowLayout());
 
         JLabel idLabel = new JLabel(identifier);
@@ -206,7 +206,7 @@ public class GameUIGenerator {
         }
 
 
-        frame.setSize(600,200);
+        frame.setSize(700,500);
         if (activeLabels.containsKey(frameId)) { 
             messageLabel = activeLabels.get(frameId);
 

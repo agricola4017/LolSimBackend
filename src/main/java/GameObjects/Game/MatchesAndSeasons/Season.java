@@ -70,6 +70,7 @@ public abstract class Season implements Serializable {
     private final Map<Team, Standing> teamToStandingMap;
     
     private Team winner;
+    private Team runnerUp;
 
     protected Season(List<Team> teams, String name) {
         this.teams = teams;
@@ -80,6 +81,7 @@ public abstract class Season implements Serializable {
         this.oldStandings = new ArrayList<>();
         this.name = name;
         this.winner = null;
+        this.runnerUp = null;
 
         initStandings();
     }
@@ -93,6 +95,7 @@ public abstract class Season implements Serializable {
         this.oldStandings = oldStandings;
         this.name = name;
         this.winner = null;
+        this.runnerUp = null;
 
         initStandings();
     }
@@ -128,6 +131,10 @@ public abstract class Season implements Serializable {
         return this.winner;
     }
 
+    public Team getRunnerUp() {
+        return this.runnerUp;
+    }
+
     protected Series peekSeriesToBePlayed() {
         return seriesToBePlayed.peek();
     }
@@ -140,6 +147,10 @@ public abstract class Season implements Serializable {
         return teams.size();
     }
 
+    public Boolean containsTeam(Team team) {
+        return teams.contains(team);
+    }
+
     /**
      * Sets the winner of the season if it has not already been set
      * @param winner
@@ -149,6 +160,13 @@ public abstract class Season implements Serializable {
             return;
         }
         this.winner = winner;
+    }   
+
+    protected void setRunnerUp(Team runnerUp) {
+        if (this.runnerUp != null) {
+            return;
+        }
+        this.runnerUp = runnerUp;
     }   
 
     protected int getOneSetCount() {

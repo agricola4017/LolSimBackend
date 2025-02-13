@@ -16,12 +16,12 @@ public class GameControllerUI {
     private JButton findTeamButton;
     private JButton saveGameButton;
     private JButton loadGameButton;
-
+    private JButton seeHistoryButton;
     public GameControllerUI() {
         // Create the frame
         JFrame frame = new JFrame("Game Options");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 200);
+        frame.setSize(400, 300);
         //frame.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 
@@ -56,11 +56,16 @@ public class GameControllerUI {
         saveLoadPanel.add(saveGameButton);
         saveLoadPanel.add(loadGameButton);
 
+        JPanel historyPanel = new JPanel(new FlowLayout());
+        seeHistoryButton = new JButton("See History");
+        historyPanel.add(seeHistoryButton);
+
         // Add buttons to the frame
         frame.add(playPanel);
         frame.add(seePanel);
         frame.add(signFindPanel);
         frame.add(saveLoadPanel);
+        frame.add(historyPanel);
 
         // Set frame visibility
         frame.setVisible(true);
@@ -108,5 +113,9 @@ public class GameControllerUI {
 
     public JButton getLoadGameButton() {
         return loadGameButton;
+    }
+
+    public JButton getSeeHistoryButton() {
+        return seeHistoryButton;
     }
 }

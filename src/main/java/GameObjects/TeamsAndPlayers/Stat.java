@@ -142,25 +142,25 @@ public class Stat implements Serializable{
     public void increaseStats(int randomValue) {
         int delta = this.potential - this.getOVR();
         
-        this.laning += randomNumberSlowFast(1,delta);
-        this.teamfighting += randomNumberSlowFast(1,delta);
-        this.economy += randomNumberSlowFast(1,delta);
-        this.consistency += randomNumberSlowFast(1,delta);
-        this.teamwork += randomNumberSlowFast(1,delta);
-        this.aggression += randomNumberSlowFast(1,delta);
-        this.stamina += randomNumberSlowFast(1,delta);
+        this.laning = Math.min(100, this.laning + randomNumberSlowFast(1,delta));
+        this.teamfighting = Math.min(100, this.teamfighting + randomNumberSlowFast(1,delta));
+        this.economy = Math.min(100, this.economy + randomNumberSlowFast(1,delta));
+        this.consistency = Math.min(100, this.consistency + randomNumberSlowFast(1,delta));
+        this.teamwork = Math.min(100, this.teamwork + randomNumberSlowFast(1,delta));
+        this.aggression = Math.min(100, this.aggression + randomNumberSlowFast(1,delta));
+        this.stamina = Math.min(100, this.stamina + randomNumberSlowFast(1,delta));
     }
 
     public void decreaseStats(int randomValue) {
         //decrease should not actually use POT, we should have big increases but NOT big decreases 
         int delta = this.potential - this.getOVR();
-        this.laning -= randomNumberSlowFast(1,delta);
-        this.teamfighting -= randomNumberSlowFast(1,delta);
-        this.economy -= randomNumberSlowFast(1,delta);
-        this.consistency -= randomNumberSlowFast(1,delta);
-        this.teamwork -= randomNumberSlowFast(1,delta);
-        this.aggression -= randomNumberSlowFast(1,delta);
-        this.stamina -= randomNumberSlowFast(1,delta);
+        this.laning = Math.max(0, this.laning - randomNumberSlowFast(1,delta));
+        this.teamfighting = Math.max(0, this.teamfighting - randomNumberSlowFast(1,delta));
+        this.economy = Math.max(0, this.economy - randomNumberSlowFast(1,delta));
+        this.consistency = Math.max(0, this.consistency - randomNumberSlowFast(1,delta));
+        this.teamwork = Math.max(0, this.teamwork - randomNumberSlowFast(1,delta));
+        this.aggression = Math.max(0, this.aggression - randomNumberSlowFast(1,delta));
+        this.stamina = Math.max(0, this.stamina - randomNumberSlowFast(1,delta));
     }
     public int getLaning() {
         return laning;

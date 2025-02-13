@@ -43,12 +43,14 @@ public class UIGameService {
     private JButton findTeamButton;
     private JButton saveGameButton;
     private JButton loadGameButton;
+    private JButton seeHistoryButton;
     private GameUIGenerator gameUIGenerator;
 
     private static final String TEAMINFO_PANELLID = "teamInfo";
     private static final String PLAYERINFO_PANELLID = "playerInfo";
     private static final String MATCHLOG_PANELID = "matchLog";
     private static final String STANDINGS_PANELID = "standings";
+    private static final String HISTORY_PANELID = "history";
 
     public UIGameService(Game game, GameControllerUI gameControllerUI) {
         this.playSeasonButton = gameControllerUI.getPlaySeasonButton();
@@ -62,6 +64,7 @@ public class UIGameService {
         this.findTeamButton = gameControllerUI.getFindTeamButton();
         this.saveGameButton = gameControllerUI.getSaveGameButton();
         this.loadGameButton = gameControllerUI.getLoadGameButton();
+        this.seeHistoryButton = gameControllerUI.getSeeHistoryButton();
         this.game = game;
         this.gameUIGenerator = new GameUIGenerator();
     }
@@ -81,6 +84,7 @@ public class UIGameService {
                 
                 refreshOrCreateTeamInfo();
                 refreshOrCreateStandings(currentSeason);
+                refreshOrCreateHistory();
                 if (matchLog != null)
                     refreshOrCreateMatchLog(matchLog);
                 try {
@@ -107,6 +111,7 @@ public class UIGameService {
                     // Also update standings after each game
                     refreshOrCreateStandings(currentSeason);
                     refreshOrCreateTeamInfo();
+                    refreshOrCreateHistory();
                 }
                 try {
                     Thread.sleep(100);
@@ -131,26 +136,31 @@ public class UIGameService {
                 MatchLog matchLog;
                 Team playingTeam = game.getPlayingTeam();
 
-                do {
-                    matchLog = game.playMatch(currentSeason);
-                } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
+                if (currentSeason.containsTeam(playingTeam)) {
+                    do {
+                        matchLog = game.playMatch(currentSeason);
+                    } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
+                    
+                    if (matchLog != null) {
+                        refreshOrCreateMatchLog(matchLog);
+                    }    
+                    // Also update standings after each game
+                    refreshOrCreateStandings(currentSeason);
+                    refreshOrCreateTeamInfo();
+    
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        System.out.println("Interrupted");
+                    }
+    
+                    if (currentSeason.isFinished()) {
+                        game.countDownLatch();
+                    }
+                } else {
+                    System.out.println("Team not in season");
+                }
                 
-                if (matchLog != null) {
-                    refreshOrCreateMatchLog(matchLog);
-                }    
-                // Also update standings after each game
-                refreshOrCreateStandings(currentSeason);
-                refreshOrCreateTeamInfo();
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    System.out.println("Interrupted");
-                }
-
-                if (currentSeason.isFinished()) {
-                    game.countDownLatch();
-                }
             }           
         };
 
@@ -314,8 +324,21 @@ public class UIGameService {
         };
         loadGameButton.addActionListener(loadGameListener);
         buttonToActionListenerMap.put(loadGameButton, loadGameListener);
+
+        ActionListener seeHistoryListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // See history
+                refreshOrCreateHistory();
+            }
+        };
+        seeHistoryButton.addActionListener(seeHistoryListener);
+        buttonToActionListenerMap.put(seeHistoryButton, seeHistoryListener);
     }
 
+    void refreshOrCreateHistory() {
+        gameUIGenerator.createOrUpdateTextPanel(HISTORY_PANELID, "History", game.getHistory().getLeagueHistory());
+    }
     void refreshOrCreateStandings(Season currentSeason) {
         String winner = "";
         winner = currentSeason != null && currentSeason.isFinished() ? currentSeason.getName() + " Winner: " + currentSeason.getWinner().getTeamName() : currentSeason.getName() + " is in progress";

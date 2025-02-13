@@ -90,6 +90,7 @@ public class SpringSplit extends Season {
         Boolean isFinished = super.isSeriesToBePlayedEmptyAndNotNull();
         if (isFinished) {
             super.setWinner(super.getStandings().get(0).getTeam());
+            super.setRunnerUp(super.getStandings().get(1).getTeam());
         }
         return isFinished;
     } 

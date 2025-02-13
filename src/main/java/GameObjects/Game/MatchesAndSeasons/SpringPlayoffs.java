@@ -117,6 +117,7 @@ public class SpringPlayoffs extends Season {
         if (isFinished) {
             //System.out.println("Winner of Playoffs is: " + winner.getTeamName());
             super.setWinner((Team)this.playingTeams.toArray()[0]);
+            super.setRunnerUp(super.getStandings().get(1).getTeam());
         }
         return isFinished;
     }
