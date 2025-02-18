@@ -53,19 +53,36 @@ public class Team implements Serializable {
         return players;
     }
 
+    public List<Player> getNonRosterPlayers() {
+        List<Player> nonRosterPlayers = new LinkedList<>(this.players);
+        nonRosterPlayers.removeAll(this.playerRoster.getActivePlayers().values());
+        return nonRosterPlayers;
+    }
+
     public void setPlayers(List<Player> players) {
+        for (Player player : players) {
+            player.setTeamID(this.teamID);
+        }
         this.players = players;
     }
 
     public void addPlayer(Player player) {
+        player.setTeamID(this.teamID);
         this.players.add(player);
     }
 
     public void addPlayers(List<Player> players) {
         for (Player player : players) {
+            player.setTeamID(this.teamID);
             this.players.add(player);
         }
     }
+
+    public void removePlayer(Player player) {
+        player.setTeamID(-1);
+        this.players.remove(player);
+    }
+
     public int getTeamID() {
         return teamID;
     }
@@ -108,8 +125,7 @@ public class Team implements Serializable {
                 "Average Placement=" + avgPlacement + "\n" +
                 "OVR=" + playerRoster.getOVR() + "\n" +
                 //", players=" + players +
-                "Roster=" + playerRoster +
-                '}';
+                "Roster=" + playerRoster;
 
         Set<Player> parsedPlayers = new HashSet<>(playerRoster.getActivePlayers().values());
 

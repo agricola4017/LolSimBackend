@@ -27,6 +27,9 @@ public class Player implements Serializable {
 
     private int[] seasonalChange = new int[] {0,0};
 
+    private int yearsWithTeam;
+    private int yearsStartingWithTeam;
+
     //generate random player
     public Player() {
         this.playerID = counter; //grab latest id
@@ -39,6 +42,8 @@ public class Player implements Serializable {
         this.region = Region.NA; //randomize
         this.OVR = stat.getOVR();
         this.stat.calculatePotential(age);
+        this.yearsWithTeam = 0;
+        this.yearsStartingWithTeam = 0;
         counter++;
         
     }
@@ -54,6 +59,8 @@ public class Player implements Serializable {
         this.region = region;
         this.OVR = stat.getOVR();
         this.stat.calculatePotential(age);
+        this.yearsWithTeam = 0;
+        this.yearsStartingWithTeam = 0;
         counter++;
     }
 
@@ -77,7 +84,6 @@ public class Player implements Serializable {
         float value = 65.00f;
         Stat stat = Stat.generateRandomStats(OVR);
         Region region = Region.generateRandomRegion();
-        counter++;
 
         return new Player(playerID, playerName, teamID, age, position, value, stat, region);
     }
@@ -90,7 +96,6 @@ public class Player implements Serializable {
         float value = 65.00f;
         Stat stat = Stat.generateRandomStats();
         Region region = Region.generateRandomRegion();
-        counter++;
 
         return new Player(playerID, playerName, teamId, age, position, value, stat, region);
     }
@@ -103,7 +108,6 @@ public class Player implements Serializable {
         float value = 65.00f;
         Stat stat = Stat.generatePerfectStat();
         Region region = Region.generateRandomRegion();
-        counter++;
 
         return new Player(playerID, playerName, teamId, age, position, value, stat, region);
     }
@@ -211,6 +215,30 @@ public class Player implements Serializable {
         return stat.getOVR();
     }
 
+    public int getYearsWithTeam() {
+        return yearsWithTeam;
+    }  
+
+    public int getYearsStartingWithTeam() {
+        return yearsStartingWithTeam;
+    }   
+
+    public void addYearsWithTeam() {
+        yearsWithTeam++;
+    }   
+
+    public void addYearsStartingWithTeam() {
+        yearsStartingWithTeam++;
+    }   
+
+    public void resetYearsStartingWithTeam() { 
+        yearsStartingWithTeam = 0;
+    }
+
+    public void resetYearsWithTeam() {
+        yearsWithTeam = 0;
+    }
+
     @Override
     public String toString() {
         int gp = gamesPlayed;
@@ -230,10 +258,11 @@ public class Player implements Serializable {
                 "/" + (seasonalChange[1]>=0 ? "+" : "") + seasonalChange[1] + ")" +
 
                 " | " + kills/gp + "/" + deaths/gp +
-                " | " + cs/gp + " " + " | " + gold/gp;
+                " | " + cs/gp + " " + " | " + gold/gp + 
+                " | " + yearsWithTeam + " | " + yearsStartingWithTeam;
     }
     
     public static String toStringHeaders() {
-        return "ID | Name | Age | main | Position | OVR/POT | KDA | CS/Gold";
+        return "ID | Name | Age | main | Position | OVR/POT | KDA | CS/Gold | YWT | YSWT";
     }
 }

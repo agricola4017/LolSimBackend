@@ -67,7 +67,7 @@ public abstract class Season implements Serializable {
     private final List<Standing> standings;
     private final List<Standing> oldStandings;
     private final List<Team> teams;
-    private final Map<Team, Standing> teamToStandingMap;
+    private final Map<Integer, Standing> teamIDToStandingMap;
     
     private Team winner;
     private Team runnerUp;
@@ -77,7 +77,7 @@ public abstract class Season implements Serializable {
         this.oneSetCount = teams.size()/2;
         this.seriesToBePlayed = new ArrayDeque<>();
         this.standings = new ArrayList<>();
-        this.teamToStandingMap = new HashMap<>();
+        this.teamIDToStandingMap = new HashMap<>();
         this.oldStandings = new ArrayList<>();
         this.name = name;
         this.winner = null;
@@ -91,7 +91,7 @@ public abstract class Season implements Serializable {
         this.oneSetCount = teams.size()/2;
         this.seriesToBePlayed = new ArrayDeque<>();
         this.standings = new ArrayList<>();
-        this.teamToStandingMap = new HashMap<>();
+        this.teamIDToStandingMap = new HashMap<>();
         this.oldStandings = oldStandings;
         this.name = name;
         this.winner = null;
@@ -116,8 +116,8 @@ public abstract class Season implements Serializable {
     }
 
     protected void updateStandings(Team winner, Team loser) {
-        teamToStandingMap.get(winner).wonGame();
-        teamToStandingMap.get(loser).lostGame();
+        teamIDToStandingMap.get(winner.getTeamID()).wonGame();
+        teamIDToStandingMap.get(loser.getTeamID()).lostGame();
         Collections.sort(this.standings);
     }
 
@@ -186,7 +186,7 @@ public abstract class Season implements Serializable {
     }
     
     public Standing getStanding(Team team) {
-        return this.teamToStandingMap.get(team);
+        return this.teamIDToStandingMap.get(team.getTeamID());
     }
 
     protected List<Standing> getOldStandings() {
@@ -207,11 +207,10 @@ public abstract class Season implements Serializable {
      * Initializes the standings based on the teams in the league
      */
     private void initStandings() {
-        System.out.println("Initializing standings");
         for (int i = 0; i < this.teams.size(); i++) {
             Standing standing = new Standing(teams.get(i));
             this.standings.add(standing);
-            this.teamToStandingMap.put(teams.get(i), standing);
+            this.teamIDToStandingMap.put(teams.get(i).getTeamID(), standing);
         }
     }
 

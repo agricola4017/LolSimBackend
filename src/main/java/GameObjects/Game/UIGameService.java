@@ -21,11 +21,11 @@ import static Functions.Functions.flattenListString;
 import java.awt.event.ActionEvent;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
+import javax.swing.SwingWorker;
 import javax.swing.JButton;
 
 public class UIGameService {
@@ -52,7 +52,9 @@ public class UIGameService {
     private static final String STANDINGS_PANELID = "standings";
     private static final String HISTORY_PANELID = "history";
 
-    public UIGameService(Game game, GameControllerUI gameControllerUI) {
+    private CountDownLatch latch;
+
+    public UIGameService(Game game, GameControllerUI gameControllerUI, CountDownLatch latch) {
         this.playSeasonButton = gameControllerUI.getPlaySeasonButton();
         this.playGameButton = gameControllerUI.getPlayGameButton();
         this.playTeamGameButton = gameControllerUI.getPlayTeamGameButton();
@@ -67,6 +69,7 @@ public class UIGameService {
         this.seeHistoryButton = gameControllerUI.getSeeHistoryButton();
         this.game = game;
         this.gameUIGenerator = new GameUIGenerator();
+        this.latch = latch;
     }
 
     /**
@@ -79,26 +82,48 @@ public class UIGameService {
         ActionListener playSeasonListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Season currentSeason = game.getSeasonsToPlay().peek();
-                MatchLog matchLog = game.playSeason(currentSeason);
-                
-                refreshOrCreateTeamInfo();
-                refreshOrCreateStandings(currentSeason);
-                refreshOrCreateHistory();
-                if (matchLog != null)
-                    refreshOrCreateMatchLog(matchLog);
-                try {
-                    Thread.sleep(100);
-                    game.countDownLatch();
-                } catch (InterruptedException ex) {
-                    System.out.println("Interrupted");
-                }
 
+                playSeasonButton.setEnabled(false);
+
+                SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+                    Season currentSeason;
+                    MatchLog matchLog;
+
+                    @Override
+                    protected Void doInBackground() throws Exception {  
+                        currentSeason = game.getSeasonsToPlay().peek();
+                        matchLog = game.playSeason(currentSeason);
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.exit(1);
+                        }
+                        refreshOrCreateStandings(currentSeason);
+                        refreshOrCreateHistory();
+                        if (matchLog != null)
+                            refreshOrCreateMatchLog(matchLog);
+                        try {
+                            game.countDownLatch();
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                            System.out.println("Interrupted");
+                        }
+                        playSeasonButton.setEnabled(true);
+                    }
+                };
+                swingWorker.execute();
             }
         };
 
         buttonToActionListenerMap.put(playSeasonButton, playSeasonListener);
         playSeasonButton.addActionListener(playSeasonListener);
+
 
         ActionListener playGameListener = new ActionListener() {
             @Override

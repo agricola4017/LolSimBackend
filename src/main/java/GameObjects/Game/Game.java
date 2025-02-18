@@ -28,6 +28,7 @@ public class Game {
     //game state objects that represent current game 
     private List<Team> teams;
     private List<Player> activePlayers;
+    private List<Player> teamlessPlayers; 
 
     private Map<Integer, Team> teamIDtoTeamMap; //specifically gameplay ones that will be loaded and saved 
     private Map<Integer, Player> playerIDtoPlayerMap;
@@ -52,16 +53,19 @@ public class Game {
         this.playerIDtoPlayerMap = new HashMap<>();
         this.latch = new CountDownLatch(0);
         this.gameIsRunning = true;
+        this.initTeamlessPlayers();
         //would be cool if you could force a load if you did this constructor, maybe a factory is necessary for this
     }
 
-    public Game(Map<Integer, Team> teamIDtoTeamMap, Map<Integer, Player> playerIDtoPlayerMap, Team playingTeam) {
+    public Game(Map<Integer, Team> teamIDtoTeamMap, Map<Integer, Player> playerIDtoPlayerMap, Team playingTeam, CountDownLatch latch) {
         this.teamIDtoTeamMap = teamIDtoTeamMap;
         this.playerIDtoPlayerMap = playerIDtoPlayerMap;
         this.playingTeam = playingTeam;
+        this.latch = latch;
 
         this.teams = new ArrayList<>(teamIDtoTeamMap.values());
         this.activePlayers = new ArrayList<>(playerIDtoPlayerMap.values());
+        this.initTeamlessPlayers();
     }
 
     public void loadGame(boolean gameIsRunning, Queue<Season> seasonsToPlay, List<Team> teams, List<Player> activePlayers, 
@@ -77,6 +81,7 @@ public class Game {
         this.history = new History(1);
 
         this.currentSeason = seasonsToPlay.peek();
+        this.initTeamlessPlayers();
     }
 
     //getters and setters
@@ -152,14 +157,13 @@ public class Game {
      */
     void playGame() throws InterruptedException{
         int splitCount = 1;
-
-        this.latch = new CountDownLatch(0);
         this.gameIsRunning = true;
         this.history = new History(splitCount);
         
         while(gameIsRunning) {
             currentSeason = prepareNewSeason(splitCount);
             
+            latch.countDown();
             latch = new CountDownLatch(1);
             latch.await();
 
@@ -212,9 +216,19 @@ public class Game {
         return ret;
     }
 
+    void initTeamlessPlayers() {
+        teamlessPlayers = new ArrayList<>();
+        for (Player player: activePlayers) {
+            if (player.getTeamID() == -1) {
+                teamlessPlayers.add(player);
+            }
+        }
+    }
+
     /**
      * cleans up the game after a season has finished
      * * sorts the standings, records the placements, clears the league, and runs player progression, and cleans up action listeners
+     * * signs new players to teams, and generates new players for the next season 
      * @param splitCount
      */
     void postSeasonCleanup(int splitCount, Season currentSeason) {
@@ -222,12 +236,77 @@ public class Game {
 
         repopulateTeamInOrderOfStandings(currentSeason);
         adjustPlayerStats();
-        
+    
         activePlayers.sort(Comparator.comparingInt(Player::getOVR));
         history.recordSeason(currentSeason);
+        if (currentSeason instanceof SpringPlayoffs) {
+            generatePlayers();
+            //mockFreeAgency(currentSeason);
+            //retirePlayers();
+        }
         Season season = seasonsToPlay.poll();
         seasonsToPlay.add(season.generateNextSeason(teams));
         //cleanActionListeners();
+    }
+
+    void generatePlayers() {
+        for (int i = 0; i < 50; i++) {
+            Player player = Player.generatePlayer();
+            activePlayers.add(player);
+        }
+        initTeamlessPlayers();
+    }
+
+    void mockFreeAgency(Season currentSeason) {
+        //generates some new players 
+        // there are 10 teams, so let's just generate 50 new players 
+        for (Team team: teams) {
+            team.normalizePlayers();
+            
+            for (Player player: team.getPlayers()) {
+                player.addYearsWithTeam();
+            }
+
+            for (Player player: team.getPlayerRoster().getActivePlayers().values()) {
+                player.addYearsStartingWithTeam();
+            }
+
+            //algo should compare all possible activeRoster players one by one, measure largest OVR delta, and if there is no player signable, sign youngest player that is the best replacement 
+            for (int playerIndex = 0; playerIndex < teamlessPlayers.size(); playerIndex++) {
+                Player player = teamlessPlayers.get(playerIndex);
+                Boolean noPlayerInPosition = team.getPlayerRoster().getPlayerByPosition(player.getPosition()) == null;
+                Boolean playerInRosterWeaker = team.getPlayerRoster().getPlayerByPosition(player.getPosition()).getOVR() < player.getOVR();
+                if (noPlayerInPosition || playerInRosterWeaker) {
+                    team.addPlayer(player);
+                    teamlessPlayers.remove(player);
+                    playerIndex--;
+                    break;
+                }
+            }
+            team.normalizePlayers();
+
+            //if team has more than 10 players, remove player with lowest POT
+            if (team.getPlayers().size() > 10) {
+                List<Player> nonRosterPlayers = team.getNonRosterPlayers();
+                //not sure why this would ever throw null, but check on this later
+                Player worst = nonRosterPlayers.stream().min(Comparator.comparingInt(p -> p.getStat().getPotential())).get();
+                team.removePlayer(worst);
+                teamlessPlayers.add(worst);
+                worst.resetYearsStartingWithTeam();
+                worst.resetYearsWithTeam();
+            }
+        }
+    }
+
+    void retirePlayers() {
+        if (teamlessPlayers.size() > 100) {
+            teamlessPlayers.sort(Comparator.comparingInt(p -> p.getStat().getPotential()));
+
+            for (int i = 0; i < 10; i++) {
+                teamlessPlayers.remove(0);
+                activePlayers.remove(0);
+            }
+        }
     }
 
     void repopulateTeamInOrderOfStandings(Season currentSeason) {
@@ -291,6 +370,12 @@ public class Game {
     void cleanActionListeners() {
         for (Map.Entry<JButton, ActionListener> entry : buttonToActionListenerMap.entrySet()) {
             entry.getKey().removeActionListener(entry.getValue());
+        }
+    }
+
+    private void disableActionListeners() {
+        for (Map.Entry<JButton, ActionListener> entry : buttonToActionListenerMap.entrySet()) {
+            entry.getKey().setEnabled(false);
         }
     }
 

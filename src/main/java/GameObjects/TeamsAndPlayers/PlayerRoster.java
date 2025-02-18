@@ -2,24 +2,34 @@ package GameObjects.TeamsAndPlayers;
 
 import java.util.*;
 import java.io.Serializable;
+import java.util.AbstractMap.SimpleEntry;
 
 public class PlayerRoster implements Serializable {
 
     //restrict to one roster per team
     private EnumMap<Position,Player> activePlayers;
+    private List<SimpleEntry<Position, Integer>> weakestToStrongestPositions;
 
     public PlayerRoster() {
         this.activePlayers = new EnumMap<>(Position.class);
+        this.weakestToStrongestPositions = new LinkedList<SimpleEntry<Position, Integer>>();
     }
 
     public PlayerRoster(List<Player> players) {
         this.activePlayers = new EnumMap<>(Position.class);
-
+        this.weakestToStrongestPositions = new LinkedList<SimpleEntry<Position, Integer>>();
         normalizePlayers(players);
-
     }
 
+    /**
+     * normalizes the player roster by sorting the players by position and adding them to the active players map
+     * Fills weakestToStrongestPositions
+     * adds Players 'YearsStartingWithTeam' count 
+     * @param players
+     */
     public void normalizePlayers(List<Player> players) {
+
+        EnumMap<Position,Player> oldPlayers = this.activePlayers;
         // Clear current active players
         this.activePlayers.clear();
         
@@ -64,7 +74,21 @@ public class PlayerRoster implements Serializable {
 
             count++;
         }
+
+        for (Position position : Position.getPositions()) {
+            SimpleEntry<Position, Integer> entry = new SimpleEntry<>(position, activePlayers.get(position).getStat().getOVR());
+            weakestToStrongestPositions.add(entry);
+        }
+        
+        weakestToStrongestPositions.sort((a, b) -> b.getValue() - a.getValue());
+
+        for (Position position : Position.getPositions()) {
+            if (oldPlayers.get(position) != this.activePlayers.get(position)) {
+                oldPlayers.get(position).resetYearsStartingWithTeam();
+            }
+        }
     }
+
     public Map<Position,Player> getActivePlayers() {
         return activePlayers;
     }
@@ -74,6 +98,10 @@ public class PlayerRoster implements Serializable {
     }
     public void setActivePlayers(EnumMap<Position,Player> activePlayers) {
         this.activePlayers = activePlayers;
+    }
+
+    public Player getPlayerByPosition(Position position) {
+        return activePlayers.get(position);
     }
 
     public int getOVR() {

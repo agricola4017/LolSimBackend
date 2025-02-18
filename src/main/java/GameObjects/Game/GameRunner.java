@@ -1,11 +1,11 @@
 package GameObjects.Game;
 
 import GameObjects.Game.GameUI.GameControllerUI;
-import GameObjects.Game.UIGameService;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.HashMap;
 
 public class GameRunner {
@@ -18,10 +18,11 @@ public class GameRunner {
 
         //implement logic for loading game from save 
 
+        CountDownLatch latch = new CountDownLatch(1);
         //this following line depends on team id 0 existing
-        Game game = new Game(teamIDtoTeamMap, playerIDtoPlayerMap, teamIDtoTeamMap.get(0));
+        Game game = new Game(teamIDtoTeamMap, playerIDtoPlayerMap, teamIDtoTeamMap.get(0), latch);
         GameControllerUI gameControllerUI = new GameControllerUI();
-        UIGameService ui = new UIGameService(game, gameControllerUI);
+        UIGameService ui = new UIGameService(game, gameControllerUI, latch);
         ui.setupActionListeners();
         game.selectTeam(teamIDtoTeamMap.get(0));
 
