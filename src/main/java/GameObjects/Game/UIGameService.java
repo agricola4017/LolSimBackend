@@ -109,6 +109,7 @@ public class UIGameService {
                         if (matchLog != null)
                             refreshOrCreateMatchLog(matchLog);
                         try {
+                            game.cleanUpPostSeasonAndPrepareForNewSeason();
                             game.countDownLatch();
                             Thread.sleep(100);
                         } catch (InterruptedException ex) {
@@ -145,6 +146,7 @@ public class UIGameService {
                 }
 
                 if (currentSeason.isFinished()) {
+                    game.cleanUpPostSeasonAndPrepareForNewSeason();
                     game.countDownLatch();
                 }
             }
@@ -180,6 +182,7 @@ public class UIGameService {
                     }
     
                     if (currentSeason.isFinished()) {
+                        game.cleanUpPostSeasonAndPrepareForNewSeason();
                         game.countDownLatch();
                     }
                 } else {

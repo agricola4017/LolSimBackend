@@ -46,6 +46,8 @@ public class Game {
 
     private Season currentSeason;
 
+    private int splitCount;
+
     public Game() {
         this.activePlayers = new ArrayList<>();
         this.teams = new ArrayList<>();
@@ -54,6 +56,7 @@ public class Game {
         this.latch = new CountDownLatch(0);
         this.gameIsRunning = true;
         this.initTeamlessPlayers();
+        this.splitCount = 1;
         //would be cool if you could force a load if you did this constructor, maybe a factory is necessary for this
     }
 
@@ -66,6 +69,7 @@ public class Game {
         this.teams = new ArrayList<>(teamIDtoTeamMap.values());
         this.activePlayers = new ArrayList<>(playerIDtoPlayerMap.values());
         this.initTeamlessPlayers();
+        this.splitCount = 1;
     }
 
     public void loadGame(boolean gameIsRunning, Queue<Season> seasonsToPlay, List<Team> teams, List<Player> activePlayers, 
@@ -82,6 +86,7 @@ public class Game {
 
         this.currentSeason = seasonsToPlay.peek();
         this.initTeamlessPlayers();
+        this.splitCount = 1;
     }
 
     //getters and setters
@@ -156,33 +161,28 @@ public class Game {
      * @throws InterruptedException
      */
     void playGame() throws InterruptedException{
-        int splitCount = 1;
         this.gameIsRunning = true;
         this.history = new History(splitCount);
-        
+        currentSeason = prepareNewSeason();
         while(gameIsRunning) {
-            currentSeason = prepareNewSeason(splitCount);
-            
-            latch.countDown();
             latch = new CountDownLatch(1);
             latch.await();
-
-            postSeasonCleanup(splitCount, currentSeason);
-            if (currentSeason instanceof SpringPlayoffs) {
-                splitCount++;
-            }
             gameIsRunning = !seasonsToPlay.isEmpty();
         }
     }
     
+    void cleanUpPostSeasonAndPrepareForNewSeason() {
+        postSeasonCleanup(currentSeason);
+        currentSeason = prepareNewSeason();
+    }
     /**
      * prepares a new season to be played
      * * initializes the standings, clears action listeners, and grabs current season
      * @param splitCount
      */
-    Season prepareNewSeason(int splitCount) {
+    Season prepareNewSeason() {
         Season currentSeason = seasonsToPlay.peek();
-        System.out.println(currentSeason.getName() + " " + splitCount);
+        System.out.println(currentSeason.getName());
 
         latch = new CountDownLatch(1);
 
@@ -231,8 +231,8 @@ public class Game {
      * * signs new players to teams, and generates new players for the next season 
      * @param splitCount
      */
-    void postSeasonCleanup(int splitCount, Season currentSeason) {
-        currentSeason.postSeasonCleanup(splitCount);
+    void postSeasonCleanup(Season currentSeason) {
+        currentSeason.postSeasonCleanup(this.splitCount);
 
         repopulateTeamInOrderOfStandings(currentSeason);
         adjustPlayerStats();
