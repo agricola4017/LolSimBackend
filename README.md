@@ -17,4 +17,4 @@ TODO for next updates:
       -- how to determine new standings from old standings for playoffs
 --match log should have position seed, should also be in standings string 
 -- need to do lots of testing after refactoring
---need to refacotr code so that UI is controlling preseason and postseason changes 
+--consider changing playgame/playteam game logic if there are errors
