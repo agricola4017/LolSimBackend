@@ -1,38 +1,55 @@
 package testPlayground.testingDynamicPatching;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class Simulate {
     public static void main(String[] args) {
-
         HeroFactory hf = new HeroFactory();
-        Hero team1fighter = hf.createHero(HeroEnum.FIGHTER);
-        Hero team1mage = hf.createHero(HeroEnum.MAGE);
-        Hero team1tank = hf.createHero(HeroEnum.TANK);
-        Hero team1tank2 = hf.createHero(HeroEnum.TANK);
-        Hero team1figher2 = hf.createHero(HeroEnum.FIGHTER);
 
+        for (int i = 0; i <2; i++) { 
+            simulateSeason(hf);
+            hf.resetStatsTrackers();
+        }
+
+        for (ClassEnum classEnum : ClassEnum.getClassEnums()) {
+            System.out.println(hf.getAverageWinrate(classEnum));
+        }
+    }
+
+    public static void simulateSeason(HeroFactory hf) {
+        for (int i = 0; i < 1000; i++) { 
+            simulateMatch(hf);
+        }
+
+        //System.out.println("Tank" + " " + hf.getTankAttack() + " " + hf.getTankHP()); 
+        //System.out.println("Fighter" + " " + hf.getFighterAttack() + " " + hf.getFighterHP());
+        //System.out.println("Mage: ATK" + hf.getMageAttack() + " HP" + hf.getMageHP());
+        for (ClassEnum classEnum : ClassEnum.getClassEnums()) {
+            //if (classEnum == ClassEnum.TANK) continue;
+            //if (classEnum == ClassEnum.FIGHTER) continue;
+            StatsTrackers statsTrackers = hf.getStatsTrackers(classEnum);
+            double winrate = statsTrackers.getWins() / (float)(statsTrackers.getWins() + statsTrackers.getLosses());
+            //System.out.println(classEnum + " winrate: " + winrate);
+            hf.balanceLevers(classEnum, winrate, 0.5, statsTrackers.getWins() + statsTrackers.getLosses());
+        }
+
+        //System.out.println("Tank" + " " + hf.getTankAttack() + " " + hf.getTankHP()); 
+        //System.out.println("Fighter" + " " + hf.getFighterAttack() + " " + hf.getFighterHP());
+        //System.out.println("Mage: ATK" + ClassEnum.MAGE.getAttack() + " HP" + ClassEnum.MAGE.getHP());
+    }
+
+    public static void simulateMatch(HeroFactory hf) {
         List<Hero> team1 = new ArrayList<>();
-        team1.add(team1fighter);
-        team1.add(team1mage);
-        team1.add(team1tank);
-        team1.add(team1tank2);
-        team1.add(team1figher2);
-
-        Hero team2fighter = hf.createHero(HeroEnum.FIGHTER);
-        Hero team2mage = hf.createHero(HeroEnum.MAGE);
-        Hero team2mage2 = hf.createHero(HeroEnum.MAGE);
-        Hero team2tank = hf.createHero(HeroEnum.TANK);
-        Hero team2figher2 = hf.createHero(HeroEnum.FIGHTER);
-
         List<Hero> team2 = new ArrayList<>();
-        team2.add(team2fighter);
-        team2.add(team2mage);
-        team2.add(team2mage2);
-        team2.add(team2tank);
-        team2.add(team2figher2);
+        
+        for (int i = 0; i < 5; i++) {
+            team1.add(hf.createHero());
+            team2.add(hf.createHero());
+        }
 
         List<MatchHero> team1MatchHeroes = new ArrayList<>();
         List<MatchHero> team2MatchHeroes = new ArrayList<>();
@@ -43,6 +60,7 @@ public class Simulate {
         for (Hero hero : team2) {
             team2MatchHeroes.add(hero.generateMatchHero());
         }
+        //aggregateHeroCounts(team1, team2);
 
         Random random = new Random();
         while (!team1MatchHeroes.isEmpty() && !team2MatchHeroes.isEmpty()) { 
@@ -74,32 +92,52 @@ public class Simulate {
         List<Hero> winner;
         List<Hero> loser;
         if (team1MatchHeroes.isEmpty()) {
-            System.out.println("Team 2 wins!");
+           // System.out.println("Team 2 wins!");
             winner = team2;
             loser = team1;
         } else {
-            System.out.println("Team 1 wins!");
+           // System.out.println("Team 1 wins!");
             winner = team1;
             loser = team2;
         }
 
         for (int i = 0; i < winner.size(); i++) {
-            hf.getStatsTrackers(winner.get(i).getHeroEnum()).addWin();
-            hf.getStatsTrackers(loser.get(i).getHeroEnum()).addLoss();
-        }
-        
-        System.out.println("Tank" + " " + hf.getTankAttack() + " " + hf.getTankHP()); 
-        System.out.println("Fighter" + " " + hf.getFighterAttack() + " " + hf.getFighterHP());
-        System.out.println("Mage" + " " + hf.getMageAttack() + " " + hf.getMageHP());
-        for (HeroEnum heroEnum : HeroEnum.getHeroEnums()) {
-            StatsTrackers statsTrackers = hf.getStatsTrackers(heroEnum);
-            double winrate = statsTrackers.getWins() / (float)(statsTrackers.getWins() + statsTrackers.getLosses());
-            System.out.println(heroEnum + ": " + winrate);
-            hf.balanceLevers(heroEnum, winrate, 0.5);
+            hf.getStatsTrackers(winner.get(i).getHeroEnum().getClassEnum()).addWin();
+            hf.getStatsTrackers(loser.get(i).getHeroEnum().getClassEnum()).addLoss();
         }
 
-        System.out.println("Tank" + " " + hf.getTankAttack() + " " + hf.getTankHP()); 
-        System.out.println("Fighter" + " " + hf.getFighterAttack() + " " + hf.getFighterHP());
-        System.out.println("Mage" + " " + hf.getMageAttack() + " " + hf.getMageHP());
+        for (ClassEnum classEnum : ClassEnum.getClassEnums()) {
+            StatsTrackers statsTrackers = hf.getStatsTrackers(classEnum);
+            double winrate = statsTrackers.getWins() / (float)(statsTrackers.getWins() + statsTrackers.getLosses());
+            //System.out.println("ClassEnum: " + classEnum + " winrate: " + winrate);
+        }
+
+        HeroEnum.resetAvailableHeroes();
+    }
+
+    public static void aggregateHeroCounts(List<Hero> team1, List<Hero> team2) {
+        Map<ClassEnum, Integer> heroCountMapTeam1 = new HashMap<>();
+        Map<ClassEnum, Integer> heroCountMapTeam2 = new HashMap<>();
+
+        // Process team 1
+        for (Hero hero : team1) {
+            ClassEnum classEnum = hero.getClassEnum(); // Assuming you have a method to get ClassEnum
+            heroCountMapTeam1.put(classEnum, heroCountMapTeam1.getOrDefault(classEnum, 0) + 1);
+        }
+
+        // Process team 2
+        for (Hero hero : team2) {
+            ClassEnum classEnum = hero.getClassEnum(); // Assuming you have a method to get ClassEnum
+            heroCountMapTeam2.put(classEnum, heroCountMapTeam2.getOrDefault(classEnum, 0) + 1);
+        }
+
+        // Print the aggregated counts
+        System.out.println("Hero counts by class:");
+        for (Map.Entry<ClassEnum, Integer> entry : heroCountMapTeam1.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+        for (Map.Entry<ClassEnum, Integer> entry : heroCountMapTeam2.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
     }
 }

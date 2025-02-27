@@ -1,36 +1,44 @@
 package testPlayground.testingDynamicPatching;
 
-public abstract class Hero {
+public class Hero {
 
-    private int hp;
-    private int attack;
+    public HeroEnum heroEnum;
+    public ClassEnum classEnum;
+    int hp;
+    int attack;
 
-    public Hero(int hp, int attack) {
-        this.hp = hp;
-        this.attack = attack;
+    protected Hero(HeroEnum heroEnum) {
+        this.heroEnum = heroEnum;
+        this.classEnum = heroEnum.getClassEnum();
+        this.hp = classEnum.getDefaultHP();
+        this.attack = classEnum.getDefaultAttack();
     }
 
-    public abstract HeroEnum getHeroEnum();
-
     public int getHp() {
-        return hp;
+        return this.hp;
     }
 
     public int getAttack() {
-        return attack;
+        return this.attack;
     }
 
-    public int setAttack(int attack) {
-        this.attack = attack;
-        return attack;
+    public int getDefaultHP() {
+        return classEnum.getDefaultHP();
     }
 
-    public int setHp(int hp) {
-        this.hp = hp;
-        return hp;
+    public int getDefaultAttack() {
+        return classEnum.getDefaultAttack();
+    }
+
+    public ClassEnum getClassEnum() {
+        return classEnum;
+    }
+
+    public HeroEnum getHeroEnum() {
+        return heroEnum;
     }
 
     public MatchHero generateMatchHero() {
-        return new MatchHero(this.hp, this.attack);
+        return new MatchHero(this.getHp(), this.getAttack());
     }
 }

@@ -25,4 +25,9 @@ public class StatsTrackers {
         losses++;
     }
 
+    public void resetStats() {
+        wins = 0;
+        losses = 0;
+    }
+
 }

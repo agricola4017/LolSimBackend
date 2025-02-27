@@ -3,125 +3,106 @@ package testPlayground.testingDynamicPatching;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HeroFactory {
 
-    private Map<HeroEnum, StatsTrackers> statsTrackersMap;
+    private final static double DEFAULT_LEVER_FACTOR = 1;
+    private static Map<HeroEnum, Hero> createdHeroes = new HashMap<>();
+    private static Map<HeroEnum, StatsTrackers> heroStatsTrackers = new HashMap<>();
+    private static Map<ClassEnum, StatsTrackers> classStatsTrackers = new HashMap<>();
 
-    private static int FIGHTER_HP;
-    private static int FIGHTER_ATTACK;
-
-    private static int MAGE_HP;
-    private static int MAGE_ATTACK;
-
-    private static int TANK_HP;
-    private static int TANK_ATTACK;
-
-    private final static int DEFAULT_LEVER_FACTOR = 10;
+    private static Map<ClassEnum, Double> classWinrates = new HashMap<>();
+    private static Map<ClassEnum, Integer> classPlayrates = new HashMap<>();
 
     public HeroFactory() {
-        statsTrackersMap = new HashMap<>();
-        for (HeroEnum heroEnum : HeroEnum.getHeroEnums()) {
-            statsTrackersMap.put(heroEnum, new StatsTrackers(0, 0));
+        for (ClassEnum classEnum : ClassEnum.values()) {
+            classStatsTrackers.put(classEnum, new StatsTrackers(0, 0));
         }
-        
-        FIGHTER_ATTACK = Fighter.DEFAULT_ATTACK;
-        FIGHTER_HP = Fighter.DEFAULT_HP;
+    }
 
-        MAGE_ATTACK = Mage.DEFAULT_ATTACK;
-        MAGE_HP = Mage.DEFAULT_HP;
+    public Hero createHero() {
+        HeroEnum heroEnum = HeroEnum.getRandomHeroEnum();
+        if (heroEnum == null) {
+            throw new RuntimeException("Unable to create hero");
+        }
+        return createHero(heroEnum);
+    }
 
-        TANK_ATTACK = Tank.DEFAULT_ATTACK;
-        TANK_HP = Tank.DEFAULT_HP;
-
+    public Hero createHero(ClassEnum classEnum) {
+        HeroEnum heroEnum = HeroEnum.getRandomHeroEnum(classEnum);
+        if (heroEnum == null) {
+            heroEnum = HeroEnum.getRandomHeroEnum();
+            if (heroEnum == null) {
+                throw new RuntimeException("Unable to create hero");
+            }
+        }
+        return createHero(heroEnum);
     }
 
     public Hero createHero(HeroEnum heroEnum) {
-        switch (heroEnum) {
-            case FIGHTER:
-                return new Fighter(FIGHTER_HP, FIGHTER_ATTACK);
-            case MAGE:
-                return new Mage(MAGE_HP, MAGE_ATTACK);
-            case TANK:
-                return new Tank(TANK_HP, TANK_ATTACK);
+        if (createdHeroes.containsKey(heroEnum)) {
+            return createdHeroes.get(heroEnum);
         }
-        throw new IllegalArgumentException("Invalid hero enum: " + heroEnum);
+        Hero hero = new Hero(heroEnum);
+        createdHeroes.put(heroEnum, hero);
+        heroStatsTrackers.put(heroEnum, new StatsTrackers(0, 0));
+        return hero;
+    }
+
+    public void balanceLevers(ClassEnum classEnum, double current, double target, int sampleSize) {
+
+        classPlayrates.compute(classEnum, (key, value) -> (value == null) ? 0 : value + 1);
+        classWinrates.compute(classEnum, (key, value) -> (value == null) ? 0 : value + current);
+
+        int attack = classEnum.getAttack();
+        int hp = classEnum.getHP();
+        int balancingHP = classEnum.getDefaultHP();
+        int balancingAttack = classEnum.getDefaultAttack();
+        
+        //System.out.println("current: " + current + " target: " + target + " sampleSize: " + sampleSize);
+
+        double sampleSizeFactoredLeverFactor = (1000.0/sampleSize)*DEFAULT_LEVER_FACTOR;
+
+        Random random = new Random();
+        int totalstats = balancingAttack + balancingHP;
+        //System.out.println("totalstats: " + totalstats);
+        double hpratio = (double)balancingHP/totalstats;
+        double randomHpFactor = random.nextGaussian(hpratio, hpratio/5);
+        double growthFactor = (target-current)/(sampleSizeFactoredLeverFactor);
+        double randomAttackFactor = 1 - randomHpFactor;
+        //System.out.println("buff = " + (target > current));
+        //System.out.println(growthFactor);
+        //System.out.println(hp*randomHpFactor + " " + (target - current) + " " + DEFAULT_LEVER_FACTOR);
+        int newHpDelta = (int)((totalstats) * randomHpFactor * (growthFactor));
+        //System.out.println(hp*randomHpFactor);
+        int newAttackDelta = (int)((totalstats) * randomAttackFactor * (growthFactor));
+        //System.out.println(newHpDelta + " " + newAttackDelta);
+        hp = balancingHP + newHpDelta;
+        hp = Math.max(hp, 1);
+        attack = balancingAttack + newAttackDelta;
+        attack = Math.max(attack, 1);
+
+        classEnum.setHP(hp);
+        classEnum.setAttack(attack);
+    }
+
+    public void resetStatsTrackers() {
+        heroStatsTrackers.values().forEach(StatsTrackers::resetStats);
+        classStatsTrackers.values().forEach(StatsTrackers::resetStats);
     }
 
     public StatsTrackers getStatsTrackers(HeroEnum heroEnum) {
-        return statsTrackersMap.get(heroEnum);
+        return heroStatsTrackers.get(heroEnum);
     }
 
-    public void balanceLevers(HeroEnum heroEnum, double current, double target) {
-        int attack;
-        int hp;
-        switch (heroEnum) {
-            case FIGHTER:
-                attack = FIGHTER_ATTACK;
-                hp = FIGHTER_HP;
-                break;
-            case MAGE:
-                attack = MAGE_ATTACK;
-                hp = MAGE_HP;
-                break;
-            case TANK:
-                attack = TANK_ATTACK;
-                hp = TANK_HP;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid hero enum: " + heroEnum);
-        }
-        Random random = new Random();
-        double randomHpFactor = random.nextGaussian((float)hp/(hp+attack), 0.03);
-        double growthFactor = (target - current)/DEFAULT_LEVER_FACTOR;
-        double randomAttackFactor = 1- randomHpFactor;
-        System.out.println("buff = " + (target > current));
-        System.out.println(growthFactor);
-        //System.out.println(hp*randomHpFactor + " " + (target - current) + " " + DEFAULT_LEVER_FACTOR);
-        double balanceFactor = hp*randomHpFactor * growthFactor;
-        int newHp = (int)(hp * randomHpFactor + balanceFactor);
-        int newAttack = (int)(attack * randomAttackFactor + balanceFactor);
-        hp = newHp;
-        attack = newAttack;
-
-        switch (heroEnum) {
-            case FIGHTER:
-                FIGHTER_HP = hp;
-                FIGHTER_ATTACK = attack;
-                break;
-            case MAGE:
-                MAGE_HP = hp;
-                MAGE_ATTACK = attack;
-                break;
-            case TANK:
-                TANK_HP = hp;
-                TANK_ATTACK = attack;
-                break;
-        }
+    public StatsTrackers getStatsTrackers(ClassEnum classEnum) {
+        return classStatsTrackers.get(classEnum);
     }
 
-    public int getFighterHP() {
-        return FIGHTER_HP;
-    }
-
-    public int getFighterAttack() {
-        return FIGHTER_ATTACK;
-    }   
-
-    public int getMageHP() {
-        return MAGE_HP;
-    }
-
-    public int getMageAttack() {
-        return MAGE_ATTACK;
-    }
-
-    public int getTankHP() {
-        return TANK_HP;
-    }
-
-    public int getTankAttack() {
-        return TANK_ATTACK;
+    public double getAverageWinrate(ClassEnum classEnum) {
+        return classWinrates.get(classEnum)/classPlayrates.get(classEnum);
     }
 }
 
