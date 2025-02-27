@@ -1,8 +1,10 @@
-package testPlayground.testingDynamicPatching;
+package testPlayground.testingDynamicPatching.deprecated;
 
-public class Mage extends Hero {
+import testPlayground.testingDynamicPatching.Hero;
+import testPlayground.testingDynamicPatching.ClassEnum;
+
+public class Mage  {
 
     public Mage() {
-        super(HeroEnum.MAGE);
     }
 }

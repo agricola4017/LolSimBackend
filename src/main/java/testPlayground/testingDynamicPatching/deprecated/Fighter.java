@@ -1,11 +1,12 @@
-package testPlayground.testingDynamicPatching;
+package testPlayground.testingDynamicPatching.deprecated;
 
-public class Fighter extends Hero {
+import testPlayground.testingDynamicPatching.HeroEnum;
+
+public class Fighter {
 
     protected static int DEFAULT_HP = 100;
     protected static int DEFAULT_ATTACK = 20;
 
     public Fighter() {
-        super(HeroEnum.FIGHTER);
     }
 }
