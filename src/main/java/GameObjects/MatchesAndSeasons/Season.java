@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
 import GameObjects.TeamsAndPlayers.Standing;
@@ -113,6 +113,19 @@ public abstract class Season implements Serializable {
             seriesToBePlayed.poll();
         }
         return match;
+    }
+
+    public Match playSimulatedMatch() {
+        Series series = seriesToBePlayed.peek();
+        Match match = series.playSimulatedMatch();
+        updateStandings(match.getWinner(), match.getLoser());
+        if (series.isFinished()) {
+            seriesToBePlayed.poll();
+        }
+        return match;
+    }
+    public boolean isTeamInNextSeries(Team team) {
+        return seriesToBePlayed.peek().isTeamInSeries(team);
     }
 
     protected void updateStandings(Team winner, Team loser) {

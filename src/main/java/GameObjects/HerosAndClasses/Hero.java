@@ -1,4 +1,6 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.HerosAndClasses;
+
+import GameObjects.MatchesAndSeasons.MatchHero;
 
 public class Hero {
 

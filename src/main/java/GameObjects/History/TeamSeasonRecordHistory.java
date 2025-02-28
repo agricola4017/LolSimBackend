@@ -1,4 +1,4 @@
-package GameObjects.Game.History;
+package GameObjects.History;
 
 import GameObjects.TeamsAndPlayers.Team;
 import java.io.Serializable;

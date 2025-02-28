@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
 
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import GameObjects.HerosAndClasses.HeroFactory;
 import GameObjects.TeamsAndPlayers.Standing;
 
 public class SpringPlayoffs extends Season {

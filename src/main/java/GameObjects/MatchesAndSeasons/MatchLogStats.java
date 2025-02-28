@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;

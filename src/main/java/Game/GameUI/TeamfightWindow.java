@@ -13,26 +13,30 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
+import java.util.concurrent.CountDownLatch;
+
 public class TeamfightWindow extends JFrame {
     private static final int WINDOW_WIDTH = 1600; 
     private static final int WINDOW_HEIGHT = 1200;
     private static final int CHARACTER_SIZE = 100;
     
     private BattlePanel battlePanel;
-    private JButton nextRoundButton;
+    private JButton startButton;
     private FightSimulation fightSimulation;
     private JLabel roundLabel;
+    private CountDownLatch latch;
     
-    public TeamfightWindow(List<Hero> team1, List<Hero> team2) {
-        fightSimulation = new FightSimulation(new HeroFactory(), team1, team2);
+    public TeamfightWindow(List<Hero> team1, List<Hero> team2, CountDownLatch latch) {
+        fightSimulation = new FightSimulation(team1, team2);
         initializeWindow();
         initializeGame();
+        this.latch = latch;
     }
     
     private void initializeWindow() {
         setTitle("Auto Battler");
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         
         // Create battle panel
@@ -41,14 +45,14 @@ public class TeamfightWindow extends JFrame {
         
         // Create control panel
         JPanel controlPanel = new JPanel();
-        nextRoundButton = new JButton("Start Next Round");
+        startButton = new JButton("Start Next Round");
         roundLabel = new JLabel("Round: 1");
         roundLabel.setFont(new Font("Arial", Font.BOLD, 16));
         
-        nextRoundButton.addActionListener(e -> startNextRound());
+        startButton.addActionListener(e -> startNextRound());
         
         controlPanel.add(roundLabel);
-        controlPanel.add(nextRoundButton);
+        controlPanel.add(startButton);
         add(controlPanel, BorderLayout.SOUTH);
     }
     
@@ -59,7 +63,7 @@ public class TeamfightWindow extends JFrame {
     }
     
     private void startNextRound() {
-        nextRoundButton.setEnabled(false);
+        startButton.setEnabled(false);
         Thread battleThread = new Thread(() -> {
             fightSimulation.simulateRound(battlePanel);
             /** 
@@ -67,7 +71,7 @@ public class TeamfightWindow extends JFrame {
                 matchSimulation.generateEnemyTeam();
                 battlePanel.updateTeams(matchSimulation.getTeam1MatchHeroes(), matchSimulation.getTeam2MatchHeroes());
                 roundLabel.setText("Round: " + matchSimulation.getRound());
-                nextRoundButton.setEnabled(true);
+                startButton.setEnabled(true);
             } else {
                 JOptionPane.showMessageDialog(this, 
                     "Game Over! You reached round " + matchSimulation.getRound(), 
@@ -77,6 +81,7 @@ public class TeamfightWindow extends JFrame {
             }
             */
             //System.exit(0);
+            //latch.countDown();
         });
         battleThread.start();
     } 
@@ -102,6 +107,14 @@ public class TeamfightWindow extends JFrame {
             graveyardTeam1 = new ArrayList<>();
             graveyardTeam2 = new ArrayList<>();
             setBackground(new Color(240, 240, 240));
+        }
+
+        public void addGraveyardTeam1(MatchHero hero) {
+            graveyardTeam1.add(hero);
+        }
+
+        public void addGraveyardTeam2(MatchHero hero) {
+            graveyardTeam2.add(hero);
         }
         
         public void updateTeams(List<MatchHero> team1, List<MatchHero> team2) {

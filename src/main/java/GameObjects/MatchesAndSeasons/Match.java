@@ -1,23 +1,61 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
+import GameObjects.HerosAndClasses.Hero;
+import GameObjects.HerosAndClasses.HeroEnum;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Position;
 import GameObjects.TeamsAndPlayers.Stat;
 import GameObjects.TeamsAndPlayers.Team;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.JFrame;
+
+import Game.GameUI.TeamfightWindow;
+
 import static Functions.Functions.rollPercentile;
+import GameObjects.HerosAndClasses.HeroFactory;
+import Game.GameUI.TeamfightWindow;
+import java.util.concurrent.CountDownLatch;
+import javax.swing.SwingUtilities;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class Match extends MatchAbstract {
     private final Team[] teams;
     private MatchLog matchLog;
-    
+    private Map<Player, Hero> playerToHeroMap;
+    private List<Hero> team1heroes;
+    private List<Hero> team2heroes;
+    private Map<Position, Player> team1playersMap;
+    private Map<Position, Player> team2playersMap;
+    private Map<Player, MatchLogPlayerStat> team1PlayerToStatMap;
+    private Map<Player, MatchLogPlayerStat> team2PlayerToStatMap;
+
     public Match(Team team1, Team team2) {
         this.teams = new Team[2];
         this.teams[0] = team1;
         this.teams[1] = team2;
+        this.playerToHeroMap = new HashMap<>();
+    }
+
+    private void draftHeros() {
+        team1heroes = new ArrayList<>();
+        team2heroes = new ArrayList<>();
+        for (Player player : teams[0].getPlayerRoster().getActivePlayers().values()) {
+            Hero hero = HeroFactory.createHero();
+            playerToHeroMap.put(player, hero);
+            team1heroes.add(hero);
+        }
+
+        for (Player player : teams[1].getPlayerRoster().getActivePlayers().values()) {
+            Hero hero = HeroFactory.createHero();
+            playerToHeroMap.put(player, hero);
+            team2heroes.add(hero);
+        }
     }
 
     private int waveValue(int economy) {
@@ -46,28 +84,8 @@ public class Match extends MatchAbstract {
 
         return rollPercentile(statPercentile) || rollPercentile(percentageKill);
     }
-    
-    public void playMatch() {
-        Team team1 = this.teams[0];
-        Team team2 = this.teams[1];
 
-        Map<Position, Player> team1playersMap = team1.getPlayerRoster().getActivePlayers();
-        Map<Position, Player> team2playersMap = team2.getPlayerRoster().getActivePlayers();
-
-        //System.out.println(team1.getPlayerRoster().getActivePlayers());
-        Map<Player, MatchLogPlayerStat> team1PlayerToStatMap = new HashMap<>();
-        Map<Player, MatchLogPlayerStat> team2PlayerToStatMap = new HashMap<>();
-
-        for (Player p: team1.getPlayerRoster().getRosterAsList()) {
-            team1PlayerToStatMap.put(p,new MatchLogPlayerStat(p, 0, 0, 0, 0));
-        }
-
-        for (Player p: team2.getPlayerRoster().getRosterAsList()) {
-            team2PlayerToStatMap.put(p,new MatchLogPlayerStat(p, 0, 0, 0, 0));
-        }
-
-        //lane phase
-
+    public void playLanePhase() {
         for (int i = 0; i < 20; i++) {
             for (Position position : Position.getPositions()) {
                 Player player1 = team1playersMap.get(position);
@@ -108,11 +126,13 @@ public class Match extends MatchAbstract {
                 }
             }
         }
+    }
 
-        //teamfights + macro, gold
-
-        //determine victory through end score
-
+    public MatchLog determineVictorAndLogStats() {
+        
+        Team team1 = this.teams[0];
+        Team team2 = this.teams[1];
+        
         int team1Gold = 0;
         int team1Kills = 0;
         int team1Deaths = 0;
@@ -177,7 +197,82 @@ public class Match extends MatchAbstract {
         }
 
         MatchLogStats matchLogStats = new MatchLogStats(teamToTeamStatMap);
-        matchLog = new MatchLog(winner, loser, matchLogStats);
+        return new MatchLog(winner, loser, matchLogStats);
+    }
+
+    public void playTeamfights() {
+        for (int i = 0; i < 3; i++) {
+            FightSimulation fs = new FightSimulation(team1heroes, team2heroes);
+            fs.generateMatchHeroes();
+            fs.simulateRound();
+        }
+    }
+
+    public void playSimulatedTeamfights() {
+        for (int i = 0; i < 3; i++) {
+            CountDownLatch latch = new CountDownLatch(1);
+
+            SwingUtilities.invokeLater(() -> {
+                TeamfightWindow tfw = new TeamfightWindow(team1heroes, team2heroes, latch);
+                tfw.setVisible(true);
+
+                tfw.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        latch.countDown();
+                    }
+                });
+            });
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    
+    public void initializeStatsAndMaps() {
+        Team team1 = this.teams[0];
+        Team team2 = this.teams[1];
+
+        team1playersMap = team1.getPlayerRoster().getActivePlayers();
+        team2playersMap = team2.getPlayerRoster().getActivePlayers();
+
+        //System.out.println(team1.getPlayerRoster().getActivePlayers());
+        team1PlayerToStatMap = new HashMap<>();
+        team2PlayerToStatMap = new HashMap<>();
+
+        for (Player p: team1.getPlayerRoster().getRosterAsList()) {
+            team1PlayerToStatMap.put(p,new MatchLogPlayerStat(p, 0, 0, 0,0, playerToHeroMap.get(p).getHeroEnum()));
+        }
+
+        for (Player p: team2.getPlayerRoster().getRosterAsList()) {
+            team2PlayerToStatMap.put(p,new MatchLogPlayerStat(p, 0, 0, 0, 0, playerToHeroMap.get(p).getHeroEnum()));
+        }
+    }
+    public void playMatch() {
+        draftHeros();
+        initializeStatsAndMaps();
+        //lane phase
+        playLanePhase();
+        //teamfights + macro, gold
+        playTeamfights();
+        //determine victory through end score
+        matchLog = determineVictorAndLogStats();
+        HeroEnum.resetAvailableHeroes();
+    }
+
+    public void playSimulatedMatch() {
+        draftHeros();
+        initializeStatsAndMaps();
+        //lane phase
+        playLanePhase();
+        //teamfights + macro, gold
+        playSimulatedTeamfights();
+        //determine victory through end score
+        matchLog = determineVictorAndLogStats();
+        HeroEnum.resetAvailableHeroes();
     }
 
     public Team[] getTeams() {
@@ -198,6 +293,9 @@ public class Match extends MatchAbstract {
 
     @Override
     public String toString() {
+        if (matchLog == null) {
+            throw new RuntimeException("Match not played yet");
+        }
         return teams[0].getTeamName() + ", " + teams[0].getPlayerRoster().getOVR() + " vs " + teams[1].getTeamName() + ", " + teams[1].getPlayerRoster().getOVR() + ", winner is " + matchLog.getWinner().getTeamName();
     }
 

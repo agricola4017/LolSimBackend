@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
 import java.io.Serializable;

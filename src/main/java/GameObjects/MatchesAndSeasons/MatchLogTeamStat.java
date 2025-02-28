@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Position;
@@ -97,12 +97,13 @@ public class MatchLogTeamStat {
         String ret = "";
         
         ret += team.getTeamName() + "\n";
-        ret += "Position | KDA | CS | GOLD | OVR\n";
+        ret += "Position | Hero | KDA | CS | GOLD | OVR\n";
         for (Map.Entry<Position, Player> positionToPlayer : positionToPlayerMap.entrySet()) {
             Player player = positionToPlayer.getValue();
             Position position = positionToPlayer.getKey();
             MatchLogPlayerStat matchLogPlayerStat = playerToPlayerStatMap.get(player);
             ret += position + " | " + player.getPlayerName() + " | ";
+            ret += matchLogPlayerStat.getHeroEnum() + " | ";
             ret += matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths() + " | ";
             ret +=  matchLogPlayerStat.getCs()+ " | " + matchLogPlayerStat.getGold();
             ret += " | " + player.getStat().getOVR() + "/" + player.getStat().getPotential();

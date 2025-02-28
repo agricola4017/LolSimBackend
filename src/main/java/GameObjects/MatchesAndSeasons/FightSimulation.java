@@ -35,8 +35,7 @@ public class FightSimulation {
      * @param team1
      * @param team2
      */
-    public FightSimulation(HeroFactory hf, List<Hero> team1, List<Hero> team2) {
-        this.hf = hf;
+    public FightSimulation(List<Hero> team1, List<Hero> team2) {
         this.team1 = team1;
         this.team2 = team2;
         this.round = 1;
@@ -47,11 +46,11 @@ public class FightSimulation {
 
         for (int i = 0; i <1; i++) { 
             //simulateSeason(hf);
-            hf.resetStatsTrackers();
+            HeroFactory.resetStatsTrackers();
         }
 
         for (ClassEnum classEnum : ClassEnum.getClassEnums()) {
-            System.out.println(hf.getAverageWinrate(classEnum));
+            System.out.println(HeroFactory.getAverageWinrate(classEnum));
         }
     }
 
@@ -102,38 +101,60 @@ public class FightSimulation {
         /** also consider making match hero a field of hero  */
     }
 
+    public MatchHero getRandomHero(List<MatchHero> team) {
+        int teamBound = team.size();
+        int randomIndex = random.nextInt(teamBound);
+        return team.get(randomIndex);
+    }
+    
     public void simulateRound(BattlePanel battlePanel) {
         while (!team1MatchHeroes.isEmpty() && !team2MatchHeroes.isEmpty()) {
-            int team1Bound = team1MatchHeroes.size();
-            int team2Bound = team2MatchHeroes.size();
-
-            int attackingHero1 = random.nextInt(team1Bound);
-            int attackingHero2 = random.nextInt(team2Bound);
-
-            int defendingHero1 = random.nextInt(team1Bound);
-            int defendingHero2 = random.nextInt(team2Bound);
-
-            MatchHero attacker1 = team1MatchHeroes.get(attackingHero1);
-            MatchHero defender2 = team2MatchHeroes.get(defendingHero2);
-            MatchHero attacker2 = team2MatchHeroes.get(attackingHero2);
-            MatchHero defender1 = team1MatchHeroes.get(defendingHero1);
-
+            MatchHero attacker1 = getRandomHero(team1MatchHeroes);
+            MatchHero defender2 = getRandomHero(team2MatchHeroes);
+            
             battlePanel.animateAttack(attacker1, defender2, attacker1.getAttack());
-            battlePanel.animateAttack(attacker2, defender1, attacker2.getAttack());
+            defender2.gotAttacked(attacker1.getAttack());
+            if (!defender2.isAlive()) {
+                team2MatchHeroes.remove(defender2);
+                battlePanel.addGraveyardTeam2(defender2);
+            }
+
+            if (!team2MatchHeroes.isEmpty() && !team1MatchHeroes.isEmpty()) {
+                MatchHero attacker2 = getRandomHero(team2MatchHeroes);
+                MatchHero defender1 = getRandomHero(team1MatchHeroes);
+                battlePanel.animateAttack(attacker2, defender1, attacker2.getAttack());
+                defender1.gotAttacked(attacker2.getAttack());
+                
+                if (!defender1.isAlive()) {
+                    team1MatchHeroes.remove(defender1);
+                    battlePanel.addGraveyardTeam1(defender1);
+                }
+            }
+
+            battlePanel.updateTeams(team1MatchHeroes, team2MatchHeroes);
+        }
+    }
+
+    public void simulateRound() {
+        while (!team1MatchHeroes.isEmpty() && !team2MatchHeroes.isEmpty()) {
+            MatchHero attacker1 = getRandomHero(team1MatchHeroes);
+            MatchHero attacker2 = getRandomHero(team2MatchHeroes);
+
+            MatchHero defender1 = getRandomHero(team1MatchHeroes);
+            MatchHero defender2 = getRandomHero(team2MatchHeroes);
 
             defender2.gotAttacked(attacker1.getAttack());
             defender1.gotAttacked(attacker2.getAttack());
 
-            battlePanel.updateTeams(team1MatchHeroes, team2MatchHeroes);
-
             if (!defender1.isAlive()) {
-                team1MatchHeroes.remove(defendingHero1);
+                team1MatchHeroes.remove(defender1);
             }
             if (!defender2.isAlive()) {
-                team2MatchHeroes.remove(defendingHero2);
+                team2MatchHeroes.remove(defender2);
             }
         }
     }
+
     public void simulateMatch(HeroFactory hf, BattlePanel battlePanel) {
         //aggregateHeroCounts(team1, team2);
 
@@ -154,12 +175,12 @@ public class FightSimulation {
         }
 
         for (int i = 0; i < winner.size(); i++) {
-            hf.getStatsTrackers(winner.get(i).getHeroEnum().getClassEnum()).addWin();
-            hf.getStatsTrackers(loser.get(i).getHeroEnum().getClassEnum()).addLoss();
+            HeroFactory.getStatsTrackers(winner.get(i).getHeroEnum().getClassEnum()).addWin();
+            HeroFactory.getStatsTrackers(loser.get(i).getHeroEnum().getClassEnum()).addLoss();
         }
 
         for (ClassEnum classEnum : ClassEnum.getClassEnums()) {
-            HeroStatsTrackers statsTrackers = hf.getStatsTrackers(classEnum);
+            HeroStatsTrackers statsTrackers = HeroFactory.getStatsTrackers(classEnum);
             double winrate = statsTrackers.getWins() / (float)(statsTrackers.getWins() + statsTrackers.getLosses());
             System.out.println(classEnum + " " + winrate);
         }

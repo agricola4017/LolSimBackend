@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Team;
 import java.util.Queue;
@@ -53,6 +53,21 @@ public class Series implements Serializable {
             return match;
         }
 
+        public Match playSimulatedMatch() {
+            Match match = matches.poll();
+            for (Team team : match.getTeams()) {
+                team.normalizePlayers();
+            }
+            match.playSimulatedMatch();
+            for (int i = 0; i < matchTeams.length; i++) {
+                if (match.getMatchLog().getLoser() ==matchTeams[i]) {
+                    matchTeamLosses[i]++;
+                }
+            }
+            this.matchesIndex++;
+            return match;
+        }
+
         /**
          * Assumes the series is finished
          */
@@ -70,6 +85,10 @@ public class Series implements Serializable {
             } else {
                 return matchTeams[1];
             }
+        }
+
+        public boolean isTeamInSeries(Team team) {
+            return team.equals(matchTeams[0]) || team.equals(matchTeams[1]);
         }
 
 }

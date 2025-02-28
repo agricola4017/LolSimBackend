@@ -1,7 +1,7 @@
 package Game;
 
-import GameObjects.Game.MatchesAndSeasons.Season;
-import GameObjects.Game.MatchesAndSeasons.MatchLog;
+import GameObjects.MatchesAndSeasons.MatchLog;
+import GameObjects.MatchesAndSeasons.Season;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Standing;
 import GameObjects.TeamsAndPlayers.Team;
@@ -130,26 +130,41 @@ public class UIGameService {
         ActionListener playGameListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {   
-                Season currentSeason = game.getSeasonsToPlay().peek();   
-                MatchLog matchLog = game.playMatch(currentSeason);
+                SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+                    Season currentSeason;
+                    MatchLog matchLog;
+                    @Override
+                    protected Void doInBackground() throws Exception {  
+                        currentSeason = game.getSeasonsToPlay().peek();   
+                        matchLog = game.playMatch(currentSeason, false);
+                        return null;
+                    }
 
-                if (matchLog != null) {
-                    refreshOrCreateMatchLog(matchLog);
-                    // Also update standings after each game
-                    refreshOrCreateStandings(currentSeason);
-                    refreshOrCreateTeamInfo();
-                    refreshOrCreateHistory();
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    System.out.println("Interrupted");
-                }
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.exit(1);
+                        }
+                        refreshOrCreateMatchLog(matchLog);
+                        refreshOrCreateStandings(currentSeason);
+                        refreshOrCreateHistory();
 
-                if (currentSeason.isFinished()) {
-                    game.cleanUpPostSeasonAndPrepareForNewSeason();
-                    game.countDownLatch();
-                }
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                            System.out.println("Interrupted");
+                        }
+        
+                        if (currentSeason.isFinished()) {
+                            game.cleanUpPostSeasonAndPrepareForNewSeason();
+                            game.countDownLatch();
+                        }
+                    }
+                };
+                swingWorker.execute();
             }
         };
 
@@ -160,37 +175,57 @@ public class UIGameService {
         ActionListener playTeamGameListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Season currentSeason = game.getSeasonsToPlay().peek();
-                MatchLog matchLog;
-                Team playingTeam = game.getPlayingTeam();
+                SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+                    MatchLog matchLog;
+                    Boolean teamGamePlayable;
+                    Season currentSeason;
+                    Team playingTeam;
 
-                if (currentSeason.containsTeam(playingTeam)) {
-                    do {
-                        matchLog = game.playMatch(currentSeason);
-                    } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
-                    
-                    if (matchLog != null) {
-                        refreshOrCreateMatchLog(matchLog);
-                    }    
-                    // Also update standings after each game
-                    refreshOrCreateStandings(currentSeason);
-                    refreshOrCreateTeamInfo();
-    
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        System.out.println("Interrupted");
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        currentSeason = game.getSeasonsToPlay().peek();
+                        playingTeam = game.getPlayingTeam();
+                        teamGamePlayable = currentSeason.containsTeam(playingTeam);
+
+                        if (teamGamePlayable) {
+                            do {
+                                matchLog = game.playMatch(currentSeason, false);
+                            } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
+                        }
+                        return null;
                     }
+
+                    @Override
+                    protected void done() {
+                        if (teamGamePlayable) {
+                            if (matchLog != null) {
+                                refreshOrCreateMatchLog(matchLog);
+                            }    
+                            // Also update standings after each game
+                            refreshOrCreateStandings(currentSeason);
+                            refreshOrCreateTeamInfo();
+                        }
+                        try {
+                            get();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.exit(1);
+                        }
+
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                            System.out.println("Interrupted");
+                        }
     
-                    if (currentSeason.isFinished()) {
-                        game.cleanUpPostSeasonAndPrepareForNewSeason();
-                        game.countDownLatch();
+                        if (currentSeason.isFinished()) {
+                            game.cleanUpPostSeasonAndPrepareForNewSeason();
+                            game.countDownLatch();
+                        }
                     }
-                } else {
-                    System.out.println("Team not in season");
-                }
-                
-            }           
+                };
+                swingWorker.execute();
+            }
         };
 
         buttonToActionListenerMap.put(playTeamGameButton, playTeamGameListener);

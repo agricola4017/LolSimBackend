@@ -1,7 +1,7 @@
 package testPlayground.testingDynamicPatching.deprecated;
 
-import testPlayground.testingDynamicPatching.Hero;
-import testPlayground.testingDynamicPatching.ClassEnum;
+import GameObjects.HerosAndClasses.ClassEnum;
+import GameObjects.HerosAndClasses.Hero;
 
 public class Mage  {
 

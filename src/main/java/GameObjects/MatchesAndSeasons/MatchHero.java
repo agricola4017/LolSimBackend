@@ -1,4 +1,6 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.MatchesAndSeasons;
+
+import GameObjects.HerosAndClasses.ClassEnum;
 
 public class MatchHero {
     private int hp;

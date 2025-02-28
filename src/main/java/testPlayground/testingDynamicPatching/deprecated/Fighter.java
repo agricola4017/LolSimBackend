@@ -1,6 +1,6 @@
 package testPlayground.testingDynamicPatching.deprecated;
 
-import testPlayground.testingDynamicPatching.HeroEnum;
+import GameObjects.HerosAndClasses.HeroEnum;
 
 public class Fighter {
 

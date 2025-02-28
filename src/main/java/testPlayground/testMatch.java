@@ -1,11 +1,11 @@
 package testPlayground;
 
-import GameObjects.Game.MatchesAndSeasons.Match;
+import GameObjects.MatchesAndSeasons.Match;
+import GameObjects.MatchesAndSeasons.Season;
+import GameObjects.MatchesAndSeasons.SpringPlayoffs;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
 
-import GameObjects.Game.MatchesAndSeasons.Season;
-import GameObjects.Game.MatchesAndSeasons.SpringPlayoffs;
 import java.util.stream.Collectors;
 
 import java.util.*;

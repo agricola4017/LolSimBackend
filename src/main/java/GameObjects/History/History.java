@@ -1,11 +1,12 @@
-package GameObjects.Game.History;
+package GameObjects.History;
 
 import java.util.Map;
 
+import GameObjects.MatchesAndSeasons.Season;
+import GameObjects.MatchesAndSeasons.SpringSplit;
 import GameObjects.TeamsAndPlayers.Standing;
 import GameObjects.TeamsAndPlayers.Team;
-import GameObjects.Game.MatchesAndSeasons.Season;
-import GameObjects.Game.MatchesAndSeasons.SpringSplit;
+
 import java.io.Serializable;
 import java.util.HashMap;
 

@@ -1,10 +1,10 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.HerosAndClasses;
 
-public class StatsTrackers {
+public class HeroStatsTrackers {
     private int wins;
     private int losses;
 
-    public StatsTrackers(int wins, int losses) {
+    public HeroStatsTrackers(int wins, int losses) {
         this.wins = wins;
         this.losses = losses;
     }

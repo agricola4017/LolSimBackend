@@ -1,11 +1,11 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.HerosAndClasses;
 
 import java.util.Random;
 
 public enum ClassEnum {
-    FIGHTER(100, 20),
-    MAGE(60, 35),
-    TANK(250, 8);
+    FIGHTER(5, 20), //100, 60,250
+    MAGE(1, 35),
+    TANK(10, 8);
 
     private final int defaultHP;
     private final int defaultAttack;

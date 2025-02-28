@@ -1,5 +1,6 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
+import GameObjects.HerosAndClasses.HeroEnum;
 import GameObjects.TeamsAndPlayers.Player;
 
 public class MatchLogPlayerStat {
@@ -8,13 +9,15 @@ public class MatchLogPlayerStat {
     private int cs;
     private int gold;
     private Player player;
+    private HeroEnum hero;
 
-    public MatchLogPlayerStat(Player player, int kills, int deaths, int cs, int gold) {
+    public MatchLogPlayerStat(Player player, int kills, int deaths, int cs, int gold, HeroEnum hero) {
         this.kills = kills;
         this.deaths = deaths;
         this.cs = cs;
         this.gold = gold;
         this.player = player;
+        this.hero = hero;
     }
 
     public int getKills() {
@@ -63,6 +66,10 @@ public class MatchLogPlayerStat {
 
     public void addDeath(int death) {
         this.deaths+=death;
+    }
+
+    public HeroEnum getHeroEnum() {
+        return hero;
     }
 
     @Override

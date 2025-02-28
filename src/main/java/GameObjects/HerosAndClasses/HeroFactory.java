@@ -3,8 +3,6 @@ package GameObjects.HerosAndClasses;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.HashSet;
-import java.util.Set;
 
 public class HeroFactory {
 
@@ -16,13 +14,13 @@ public class HeroFactory {
     private static Map<ClassEnum, Double> classWinrates = new HashMap<>();
     private static Map<ClassEnum, Integer> classPlayrates = new HashMap<>();
 
-    public HeroFactory() {
+    static {
         for (ClassEnum classEnum : ClassEnum.values()) {
             classStatsTrackers.put(classEnum, new HeroStatsTrackers(0, 0));
         }
     }
 
-    public Hero createHero() {
+    public static Hero createHero() {
         HeroEnum heroEnum = HeroEnum.getRandomHeroEnum();
         if (heroEnum == null) {
             throw new RuntimeException("Unable to create hero");
@@ -30,7 +28,7 @@ public class HeroFactory {
         return createHero(heroEnum);
     }
 
-    public Hero createHero(ClassEnum classEnum) {
+    public static Hero createHero(ClassEnum classEnum) {
         HeroEnum heroEnum = HeroEnum.getRandomHeroEnum(classEnum);
         if (heroEnum == null) {
             heroEnum = HeroEnum.getRandomHeroEnum();
@@ -41,7 +39,7 @@ public class HeroFactory {
         return createHero(heroEnum);
     }
 
-    public Hero createHero(HeroEnum heroEnum) {
+    public static Hero createHero(HeroEnum heroEnum) {
         if (createdHeroes.containsKey(heroEnum)) {
             return createdHeroes.get(heroEnum);
         }
@@ -51,7 +49,7 @@ public class HeroFactory {
         return hero;
     }
 
-    public void balanceLevers(ClassEnum classEnum, double current, double target, int sampleSize) {
+    public static void balanceLevers(ClassEnum classEnum, double current, double target, int sampleSize) {
 
         classPlayrates.compute(classEnum, (key, value) -> (value == null) ? 0 : value + 1);
         classWinrates.compute(classEnum, (key, value) -> (value == null) ? 0 : value + current);
@@ -89,20 +87,20 @@ public class HeroFactory {
         classEnum.setAttack(attack);
     }
 
-    public void resetStatsTrackers() {
+    public static void resetStatsTrackers() {
         heroStatsTrackers.values().forEach(HeroStatsTrackers::resetStats);
         classStatsTrackers.values().forEach(HeroStatsTrackers::resetStats);
     }
 
-    public HeroStatsTrackers getStatsTrackers(HeroEnum heroEnum) {
+    public static HeroStatsTrackers getStatsTrackers(HeroEnum heroEnum) {
         return heroStatsTrackers.get(heroEnum);
     }
 
-    public HeroStatsTrackers getStatsTrackers(ClassEnum classEnum) {
+    public static HeroStatsTrackers getStatsTrackers(ClassEnum classEnum) {
         return classStatsTrackers.get(classEnum);
     }
 
-    public double getAverageWinrate(ClassEnum classEnum) {
+    public static double getAverageWinrate(ClassEnum classEnum) {
         return classWinrates.get(classEnum)/classPlayrates.get(classEnum);
     }
 }

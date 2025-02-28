@@ -1,6 +1,11 @@
 package testPlayground.testingDynamicPatching;
 
 import javax.swing.SwingUtilities;
+
+import Game.GameUI.TeamfightWindow;
+import GameObjects.HerosAndClasses.Hero;
+import GameObjects.HerosAndClasses.HeroFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 

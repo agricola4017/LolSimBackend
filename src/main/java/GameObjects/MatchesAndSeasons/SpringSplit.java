@@ -1,4 +1,4 @@
-package GameObjects.Game.MatchesAndSeasons;
+package GameObjects.MatchesAndSeasons;
 
 import GameObjects.TeamsAndPlayers.Standing;
 import GameObjects.TeamsAndPlayers.Team;
@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import GameObjects.HerosAndClasses.HeroFactory;
 
 /**
  * Basic Spring Split class

@@ -1,13 +1,14 @@
 package Game;
 
-import GameObjects.Game.MatchesAndSeasons.Match;
-import GameObjects.Game.MatchesAndSeasons.MatchLog;
-import GameObjects.Game.MatchesAndSeasons.Season;
-import GameObjects.Game.MatchesAndSeasons.SpringSplit;
-import GameObjects.Game.MatchesAndSeasons.SpringPlayoffs;
+import GameObjects.History.History;
+import GameObjects.MatchesAndSeasons.Match;
+import GameObjects.MatchesAndSeasons.MatchLog;
+import GameObjects.MatchesAndSeasons.Season;
+import GameObjects.MatchesAndSeasons.SpringPlayoffs;
+import GameObjects.MatchesAndSeasons.SpringSplit;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
-import GameObjects.Game.History.History;
+import GameObjects.HerosAndClasses.HeroFactory;
 
 import javax.swing.*;
 
@@ -330,7 +331,7 @@ public class Game {
         //this validation should be moved to the controller 
         while (!currentSeason.isFinished()) {
 
-            matchLog = playMatch(currentSeason);
+            matchLog = playMatch(currentSeason, true);
             /** 
             if (count > currentSeason.getOneSetCount()) {
                 count = 1;
@@ -352,10 +353,15 @@ public class Game {
      * @param currentSeason: the season to play the match from
      * @return the match log of the match
      */
-    MatchLog playMatch(Season currentSeason) {
+    MatchLog playMatch(Season currentSeason, Boolean skip) {
         //validation should be moved to the controller 
         if (!currentSeason.isFinished()) {
-            Match match = currentSeason.playMatch();
+            Match match;
+            if (!skip && currentSeason.isTeamInNextSeries(playingTeam)) {
+                match = currentSeason.playSimulatedMatch();
+            } else {
+                match = currentSeason.playMatch();
+            }
             //System.out.println(match);
             //winner.setStanding(teamToStandingMap.get(winner)
             return match.getMatchLog();

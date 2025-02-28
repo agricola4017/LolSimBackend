@@ -1,4 +1,4 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.HerosAndClasses;
 
 import java.util.Random;
 import java.util.Arrays;
