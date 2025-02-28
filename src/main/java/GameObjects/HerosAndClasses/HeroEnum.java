@@ -26,6 +26,7 @@ public enum HeroEnum {
 
     private final ClassEnum classEnum;
     private static Set<HeroEnum> availableHeroes = new HashSet<>(Arrays.asList(values()));
+    private static Random random = new Random();
 
     HeroEnum(ClassEnum classEnum) {
         this.classEnum = classEnum;
@@ -40,14 +41,18 @@ public enum HeroEnum {
     }
 
     public static HeroEnum getRandomHeroEnum() {
-        Random random = new Random();
+        if (availableHeroes.isEmpty()) {
+            throw new RuntimeException("No available heroes");
+        }
         HeroEnum randomHeroEnum = values()[random.nextInt(values().length)];
         availableHeroes.remove(randomHeroEnum);
         return randomHeroEnum;
     }
 
     public static HeroEnum getRandomHeroEnum(ClassEnum classEnum) {
-        Random random = new Random();
+        if (availableHeroes.isEmpty()) {
+            throw new RuntimeException("No available heroes");
+        }
         List<HeroEnum> filtered = availableHeroes.stream().filter(he -> he.getClassEnum() == classEnum).collect(Collectors.toList());
         if (filtered.isEmpty()) {
             return null;

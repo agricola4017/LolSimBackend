@@ -1,4 +1,4 @@
-package GameObjects.Game;
+package Game;
 
 import GameObjects.Game.MatchesAndSeasons.Match;
 import GameObjects.Game.MatchesAndSeasons.MatchLog;

@@ -1,4 +1,4 @@
-package GameObjects.Game.Callbacks;
+package Game.Callbacks;
 
 import GameObjects.TeamsAndPlayers.Position;
 

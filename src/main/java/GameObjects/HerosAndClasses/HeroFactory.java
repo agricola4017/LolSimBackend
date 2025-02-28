@@ -1,4 +1,4 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.HerosAndClasses;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,15 +10,15 @@ public class HeroFactory {
 
     private final static double DEFAULT_LEVER_FACTOR = 1;
     private static Map<HeroEnum, Hero> createdHeroes = new HashMap<>();
-    private static Map<HeroEnum, StatsTrackers> heroStatsTrackers = new HashMap<>();
-    private static Map<ClassEnum, StatsTrackers> classStatsTrackers = new HashMap<>();
+    private static Map<HeroEnum, HeroStatsTrackers> heroStatsTrackers = new HashMap<>();
+    private static Map<ClassEnum, HeroStatsTrackers> classStatsTrackers = new HashMap<>();
 
     private static Map<ClassEnum, Double> classWinrates = new HashMap<>();
     private static Map<ClassEnum, Integer> classPlayrates = new HashMap<>();
 
     public HeroFactory() {
         for (ClassEnum classEnum : ClassEnum.values()) {
-            classStatsTrackers.put(classEnum, new StatsTrackers(0, 0));
+            classStatsTrackers.put(classEnum, new HeroStatsTrackers(0, 0));
         }
     }
 
@@ -47,7 +47,7 @@ public class HeroFactory {
         }
         Hero hero = new Hero(heroEnum);
         createdHeroes.put(heroEnum, hero);
-        heroStatsTrackers.put(heroEnum, new StatsTrackers(0, 0));
+        heroStatsTrackers.put(heroEnum, new HeroStatsTrackers(0, 0));
         return hero;
     }
 
@@ -70,7 +70,8 @@ public class HeroFactory {
         //System.out.println("totalstats: " + totalstats);
         double hpratio = (double)balancingHP/totalstats;
         double randomHpFactor = random.nextGaussian(hpratio, hpratio/5);
-        double growthFactor = (target-current)/(sampleSizeFactoredLeverFactor);
+        double volatilityFactor = 1 + random.nextGaussian(1, 2);
+        double growthFactor = volatilityFactor*(target-current)/(sampleSizeFactoredLeverFactor);
         double randomAttackFactor = 1 - randomHpFactor;
         //System.out.println("buff = " + (target > current));
         //System.out.println(growthFactor);
@@ -89,15 +90,15 @@ public class HeroFactory {
     }
 
     public void resetStatsTrackers() {
-        heroStatsTrackers.values().forEach(StatsTrackers::resetStats);
-        classStatsTrackers.values().forEach(StatsTrackers::resetStats);
+        heroStatsTrackers.values().forEach(HeroStatsTrackers::resetStats);
+        classStatsTrackers.values().forEach(HeroStatsTrackers::resetStats);
     }
 
-    public StatsTrackers getStatsTrackers(HeroEnum heroEnum) {
+    public HeroStatsTrackers getStatsTrackers(HeroEnum heroEnum) {
         return heroStatsTrackers.get(heroEnum);
     }
 
-    public StatsTrackers getStatsTrackers(ClassEnum classEnum) {
+    public HeroStatsTrackers getStatsTrackers(ClassEnum classEnum) {
         return classStatsTrackers.get(classEnum);
     }
 

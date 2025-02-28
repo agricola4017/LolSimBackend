@@ -38,7 +38,7 @@ public class Hero {
         return heroEnum;
     }
 
-    public MatchHero generateMatchHero() {
-        return new MatchHero(this.getHp(), this.getAttack());
+    public MatchHero generateMatchHero(int team) {
+        return new MatchHero(this.getHp(), this.getAttack(), this.getClassEnum(), team);
     }
 }

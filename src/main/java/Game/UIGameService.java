@@ -1,7 +1,5 @@
-package GameObjects.Game;
+package Game;
 
-import GameObjects.Game.GameUI.GameControllerUI;
-import GameObjects.Game.GameUI.GameUIGenerator;
 import GameObjects.Game.MatchesAndSeasons.Season;
 import GameObjects.Game.MatchesAndSeasons.MatchLog;
 import GameObjects.TeamsAndPlayers.Player;
@@ -14,6 +12,9 @@ import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import Functions.Functions;
+import Game.GameUI.GameControllerUI;
+import Game.GameUI.GameUIGenerator;
+
 import java.awt.event.ActionListener;
 
 import static Functions.Functions.flattenListString;

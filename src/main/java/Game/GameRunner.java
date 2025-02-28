@@ -1,11 +1,13 @@
-package GameObjects.Game;
+package Game;
 
-import GameObjects.Game.GameUI.GameControllerUI;
 import GameObjects.TeamsAndPlayers.Player;
 import GameObjects.TeamsAndPlayers.Team;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
+import Game.GameUI.GameControllerUI;
+
 import java.util.HashMap;
 
 public class GameRunner {

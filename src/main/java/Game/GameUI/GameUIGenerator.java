@@ -1,4 +1,4 @@
-package GameObjects.Game.GameUI;
+package Game.GameUI;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -10,14 +10,15 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
+import Game.Callbacks.IDFormCallback;
+import Game.Callbacks.PlayerFormCallback;
+
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import GameObjects.Game.Callbacks.PlayerFormCallback;
-import GameObjects.Game.Callbacks.IDFormCallback;
 import GameObjects.TeamsAndPlayers.Position;
 
 import java.awt.BorderLayout;

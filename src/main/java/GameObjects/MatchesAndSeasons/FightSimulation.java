@@ -1,4 +1,4 @@
-package testPlayground.testingDynamicPatching;
+package GameObjects.MatchesAndSeasons;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,12 +6,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class Simulate {
-    public static void main(String[] args) {
-        HeroFactory hf = new HeroFactory();
+import Game.GameUI.TeamfightWindow;
+import Game.GameUI.TeamfightWindow.BattlePanel;
+import GameObjects.HerosAndClasses.ClassEnum;
+import GameObjects.HerosAndClasses.Hero;
+import GameObjects.HerosAndClasses.HeroEnum;
+import GameObjects.HerosAndClasses.HeroFactory;
+import GameObjects.HerosAndClasses.HeroStatsTrackers;
 
-        for (int i = 0; i <2; i++) { 
-            simulateSeason(hf);
+public class FightSimulation {
+    private HeroFactory hf;
+    private List<Hero> team1;
+    private List<Hero> team2;
+    private List<MatchHero> team1MatchHeroes;
+    private List<MatchHero> team2MatchHeroes;
+    private List<Integer> attackingOrder;
+    private List<Integer> defendingOrder;
+    private int round;
+    private Random random;
+
+    /**
+     * presume teams have heroes in them 
+     * for (int i = 0; i < 5; i++) {
+            team1.add(hf.createHero());
+            team2.add(hf.createHero());
+        }
+     * @param hf
+     * @param team1
+     * @param team2
+     */
+    public FightSimulation(HeroFactory hf, List<Hero> team1, List<Hero> team2) {
+        this.hf = hf;
+        this.team1 = team1;
+        this.team2 = team2;
+        this.round = 1;
+        this.random = new Random();
+    }
+
+    public  void main(String[] args) {
+
+        for (int i = 0; i <1; i++) { 
+            //simulateSeason(hf);
             hf.resetStatsTrackers();
         }
 
@@ -20,8 +55,9 @@ public class Simulate {
         }
     }
 
-    public static void simulateSeason(HeroFactory hf) {
-        for (int i = 0; i < 1000; i++) { 
+    /**
+    public void simulateSeason(HeroFactory hf) {
+        for (int i = 0; i < 1; i++) { 
             simulateMatch(hf);
         }
 
@@ -40,30 +76,34 @@ public class Simulate {
         //System.out.println("Tank" + " " + hf.getTankAttack() + " " + hf.getTankHP()); 
         //System.out.println("Fighter" + " " + hf.getFighterAttack() + " " + hf.getFighterHP());
         //System.out.println("Mage: ATK" + ClassEnum.MAGE.getAttack() + " HP" + ClassEnum.MAGE.getHP());
-    }
+    } */
 
-    public static void simulateMatch(HeroFactory hf) {
-        List<Hero> team1 = new ArrayList<>();
-        List<Hero> team2 = new ArrayList<>();
-        
-        for (int i = 0; i < 5; i++) {
-            team1.add(hf.createHero());
-            team2.add(hf.createHero());
-        }
-
-        List<MatchHero> team1MatchHeroes = new ArrayList<>();
-        List<MatchHero> team2MatchHeroes = new ArrayList<>();
+    public void generateMatchHeroes() {
+        team1MatchHeroes = new ArrayList<>();
+        team2MatchHeroes = new ArrayList<>();
         
         for (Hero hero : team1) {
-            team1MatchHeroes.add(hero.generateMatchHero());
+            team1MatchHeroes.add(hero.generateMatchHero(1));
         }
         for (Hero hero : team2) {
-            team2MatchHeroes.add(hero.generateMatchHero());
+            team2MatchHeroes.add(hero.generateMatchHero(2));
         }
-        //aggregateHeroCounts(team1, team2);
+    }
 
-        Random random = new Random();
-        while (!team1MatchHeroes.isEmpty() && !team2MatchHeroes.isEmpty()) { 
+    public List<MatchHero> getTeam1MatchHeroes() {
+        return team1MatchHeroes;
+    }
+    public List<MatchHero> getTeam2MatchHeroes() {
+        return team2MatchHeroes;
+    }
+
+    public void generateAttackingAndDefendingOrder() {
+        /** shoud lbe based on speed an ddef */
+        /** also consider making match hero a field of hero  */
+    }
+
+    public void simulateRound(BattlePanel battlePanel) {
+        while (!team1MatchHeroes.isEmpty() && !team2MatchHeroes.isEmpty()) {
             int team1Bound = team1MatchHeroes.size();
             int team2Bound = team2MatchHeroes.size();
 
@@ -78,8 +118,13 @@ public class Simulate {
             MatchHero attacker2 = team2MatchHeroes.get(attackingHero2);
             MatchHero defender1 = team1MatchHeroes.get(defendingHero1);
 
+            battlePanel.animateAttack(attacker1, defender2, attacker1.getAttack());
+            battlePanel.animateAttack(attacker2, defender1, attacker2.getAttack());
+
             defender2.gotAttacked(attacker1.getAttack());
             defender1.gotAttacked(attacker2.getAttack());
+
+            battlePanel.updateTeams(team1MatchHeroes, team2MatchHeroes);
 
             if (!defender1.isAlive()) {
                 team1MatchHeroes.remove(defendingHero1);
@@ -87,6 +132,13 @@ public class Simulate {
             if (!defender2.isAlive()) {
                 team2MatchHeroes.remove(defendingHero2);
             }
+        }
+    }
+    public void simulateMatch(HeroFactory hf, BattlePanel battlePanel) {
+        //aggregateHeroCounts(team1, team2);
+
+        while (!team1MatchHeroes.isEmpty() && !team2MatchHeroes.isEmpty()) { 
+            simulateRound(battlePanel);
         }
 
         List<Hero> winner;
@@ -107,15 +159,15 @@ public class Simulate {
         }
 
         for (ClassEnum classEnum : ClassEnum.getClassEnums()) {
-            StatsTrackers statsTrackers = hf.getStatsTrackers(classEnum);
+            HeroStatsTrackers statsTrackers = hf.getStatsTrackers(classEnum);
             double winrate = statsTrackers.getWins() / (float)(statsTrackers.getWins() + statsTrackers.getLosses());
-            //System.out.println("ClassEnum: " + classEnum + " winrate: " + winrate);
+            System.out.println(classEnum + " " + winrate);
         }
 
         HeroEnum.resetAvailableHeroes();
     }
 
-    public static void aggregateHeroCounts(List<Hero> team1, List<Hero> team2) {
+    public  void aggregateHeroCounts(List<Hero> team1, List<Hero> team2) {
         Map<ClassEnum, Integer> heroCountMapTeam1 = new HashMap<>();
         Map<ClassEnum, Integer> heroCountMapTeam2 = new HashMap<>();
 
@@ -139,5 +191,9 @@ public class Simulate {
         for (Map.Entry<ClassEnum, Integer> entry : heroCountMapTeam2.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
+    }
+
+    public int getRound() {
+        return round;
     }
 }
