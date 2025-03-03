@@ -41,6 +41,6 @@ public class Hero {
     }
 
     public MatchHero generateMatchHero(int team) {
-        return new MatchHero(this.getHp(), this.getAttack(), this.getClassEnum(), team);
+        return new MatchHero(this.getHp(), this.getAttack(), this.getHeroEnum(), this.getClassEnum(), team);
     }
 }

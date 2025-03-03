@@ -242,8 +242,8 @@ public class Game {
         history.recordSeason(currentSeason);
         if (currentSeason instanceof SpringPlayoffs) {
             generatePlayers();
-            //mockFreeAgency(currentSeason);
-            //retirePlayers();
+            mockFreeAgency(currentSeason);
+            retirePlayers();
         }
         Season season = seasonsToPlay.poll();
         seasonsToPlay.add(season.generateNextSeason(teams));
@@ -258,44 +258,75 @@ public class Game {
         initTeamlessPlayers();
     }
 
+
+    private void updatePlayerTenure(Team team) {
+        // Update tenure for all players on team
+        for (Player player: team.getPlayers()) {
+            player.addYearsWithTeam();
+        }
+        
+        // Update starting tenure specifically
+        for (Player player: team.getPlayerRoster().getActivePlayers().values()) {
+            player.addYearsStartingWithTeam();
+        }
+    }
+
+    private void improveTeamRoster(Team team) {
+        // Find the best available player for each position
+        Iterator<Player> iterator = teamlessPlayers.iterator();
+        boolean playerAdded = false;
+        
+        while (iterator.hasNext()) {
+            Player availablePlayer = iterator.next();
+            Player currentPlayer = team.getPlayerRoster().getPlayerByPosition(availablePlayer.getPosition());
+            
+            // Add player if position is empty or player is better than current
+            if (currentPlayer == null || currentPlayer.getOVR() < availablePlayer.getOVR()) {
+                currentPlayer.resetYearsStartingWithTeam();
+                team.addPlayer(availablePlayer);
+                iterator.remove();
+                playerAdded = true;
+                break;  // Only add one player per team per free agency period
+            }
+        }
+        
+        if (playerAdded) {
+            team.normalizePlayers();
+        }
+    }
+
+    void retirePlayer(Team team) {
+        if (team.getPlayers().size() > 10) {
+            List<Player> nonRosterPlayers = team.getNonRosterPlayers();
+            if (!nonRosterPlayers.isEmpty()) {
+                // Find player with lowest potential
+                Optional<Player> worstPlayerOpt = nonRosterPlayers.stream()
+                    .min(Comparator.comparingInt(p -> p.getStat().getPotential()));
+                
+                if (worstPlayerOpt.isPresent()) {
+                    Player worst = worstPlayerOpt.get();
+                    team.removePlayer(worst);
+                    teamlessPlayers.add(worst);
+                    worst.resetYearsStartingWithTeam();
+                    worst.resetYearsWithTeam();
+                }
+            }
+        }
+    }
+
     void mockFreeAgency(Season currentSeason) {
         //generates some new players 
         // there are 10 teams, so let's just generate 50 new players 
         for (Team team: teams) {
             team.normalizePlayers();
             
-            for (Player player: team.getPlayers()) {
-                player.addYearsWithTeam();
-            }
-
-            for (Player player: team.getPlayerRoster().getActivePlayers().values()) {
-                player.addYearsStartingWithTeam();
-            }
+            updatePlayerTenure(team);
 
             //algo should compare all possible activeRoster players one by one, measure largest OVR delta, and if there is no player signable, sign youngest player that is the best replacement 
-            for (int playerIndex = 0; playerIndex < teamlessPlayers.size(); playerIndex++) {
-                Player player = teamlessPlayers.get(playerIndex);
-                Boolean noPlayerInPosition = team.getPlayerRoster().getPlayerByPosition(player.getPosition()) == null;
-                Boolean playerInRosterWeaker = team.getPlayerRoster().getPlayerByPosition(player.getPosition()).getOVR() < player.getOVR();
-                if (noPlayerInPosition || playerInRosterWeaker) {
-                    team.addPlayer(player);
-                    teamlessPlayers.remove(player);
-                    playerIndex--;
-                    break;
-                }
-            }
-            team.normalizePlayers();
+            improveTeamRoster(team);
 
             //if team has more than 10 players, remove player with lowest POT
-            if (team.getPlayers().size() > 10) {
-                List<Player> nonRosterPlayers = team.getNonRosterPlayers();
-                //not sure why this would ever throw null, but check on this later
-                Player worst = nonRosterPlayers.stream().min(Comparator.comparingInt(p -> p.getStat().getPotential())).get();
-                team.removePlayer(worst);
-                teamlessPlayers.add(worst);
-                worst.resetYearsStartingWithTeam();
-                worst.resetYearsWithTeam();
-            }
+            retirePlayer(team);
         }
     }
 

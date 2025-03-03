@@ -75,7 +75,7 @@ public class Match extends MatchAbstract {
     }
 
     private boolean kill(int lan1, int lan2, int agg1, int cons2) {
-        double lanediff = .6*(lan1 - lan2);
+        double lanediff = .5*(lan1 - lan2);
         final double varInfl = 0.4;
         final double percentageKill = 8;
         double divider = 100/varInfl;

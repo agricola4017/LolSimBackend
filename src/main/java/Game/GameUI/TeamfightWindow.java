@@ -98,6 +98,12 @@ public class TeamfightWindow extends JFrame {
         private static final int DAMAGE_NUMBER_DURATION = 1000; 
         private static final int ATTACK_LINE_DURATION = 500; 
         private static final int GRAVEYARD_X = WINDOW_WIDTH - 400;  
+
+        private MatchHero currentAttacker;
+        private MatchHero currentDefender;
+        private long attackAnimationStartTime;
+        private static final int ATTACK_ANIMATION_DURATION = 1000; // 1 second for full animation
+        private static final int ATTACKER_MOVEMENT = 40; // How far the attacker moves toward target
         
         public BattlePanel() {
             characterPositions = new HashMap<>();
@@ -166,34 +172,45 @@ public class TeamfightWindow extends JFrame {
             }
         }
         
-        public void animateAttack(MatchHero attacker, MatchHero target, int actualDamage) {
+        public void animateAttack(MatchHero attacker, MatchHero target, int damage) {
             if (!characterPositions.containsKey(attacker) || !characterPositions.containsKey(target)) {
                 return;
             }
             
-            Point start = characterPositions.get(attacker);
-            Point end = characterPositions.get(target);
-            
-            // Add attack line
-            attackLines.add(new AttackLine(
-                new Point(start.x + CHARACTER_SIZE/2, start.y + CHARACTER_SIZE/2),
-                new Point(end.x + CHARACTER_SIZE/2, end.y + CHARACTER_SIZE/2),
-                System.currentTimeMillis(),
-                attacker.getType()
-            ));
-            
-            // Add damage number
-            int damage = attacker.getAttack();
-            damageNumbers.add(new DamageNumber(damage, actualDamage, end.x, end.y, System.currentTimeMillis()));
+            // Set current attacking pair
+            currentAttacker = attacker;
+            currentDefender = target;
+            attackAnimationStartTime = System.currentTimeMillis();
             
             // Create attack animation
             Thread animationThread = new Thread(() -> {
+                // Animation loop
+                long startTime = System.currentTimeMillis();
+                long currentTime;
+                
+                do {
+                    currentTime = System.currentTimeMillis();
+                    repaint(); // Continuously repaint during animation
+                    try {
+                        Thread.sleep(20); // ~50 fps
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (currentTime - startTime < ATTACK_ANIMATION_DURATION);
+                
+                // Add damage number at the end of animation
+                damageNumbers.add(new DamageNumber(
+                    damage, 
+                    damage, 
+                    characterPositions.get(target).x, 
+                    characterPositions.get(target).y, 
+                    System.currentTimeMillis())
+                );
+                
+                // Reset current attacker/defender
+                currentAttacker = null;
+                currentDefender = null;
                 repaint();
-                try {
-                    Thread.sleep(ATTACK_LINE_DURATION);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             });
             
             animationThread.start();
@@ -212,8 +229,8 @@ public class TeamfightWindow extends JFrame {
             g2d.setColor(characterColors.get(character));
             switch (character.getType()) {
                 case FIGHTER:
-                    // Draw shield shape
-                    Image fighterImage = new ImageIcon("src/main/java/testPlayground/testingDynamicPatching/fighter.png").getImage();
+                    // Draw shield shapes
+                    Image fighterImage = new ImageIcon("src/main/java/GameObjects/HerosAndClasses/Assets/fighter.png").getImage();
                     if (fighterImage == null) {
                         System.out.println("Failed to load fighter.png");
                     }
@@ -224,7 +241,7 @@ public class TeamfightWindow extends JFrame {
                     break;
                 case TANK:
                     // Draw diamond shape
-                    Image tankImage = new ImageIcon("src/main/java/testPlayground/testingDynamicPatching/tank.png").getImage();
+                    Image tankImage = new ImageIcon("src/main/java/GameObjects/HerosAndClasses/Assets/tank.png").getImage();
                     if (tankImage == null) {
                         System.out.println("Failed to load tank.png");
                     }
@@ -237,7 +254,7 @@ public class TeamfightWindow extends JFrame {
                     break;
                 case MAGE:
                     // Draw circle shape
-                    Image mageImage = new ImageIcon("src/main/java/testPlayground/testingDynamicPatching/mage.png").getImage();
+                    Image mageImage = new ImageIcon("src/main/java/GameObjects/HerosAndClasses/Assets/mage.png").getImage();
                     if (mageImage == null) {
                         System.out.println("Failed to load mage.png");
                     }
@@ -247,6 +264,39 @@ public class TeamfightWindow extends JFrame {
                     g2d.drawOval(x, y, CHARACTER_SIZE, CHARACTER_SIZE); */
                     break;
             }
+        }
+
+        private void drawTargetingArrow(Graphics2D g2d, Point start, Point end, float progress) {
+            // Calculate center points
+            int startX = start.x + CHARACTER_SIZE/2;
+            int startY = start.y + CHARACTER_SIZE/2;
+            int endX = end.x + CHARACTER_SIZE/2;
+            int endY = end.y + CHARACTER_SIZE/2;
+            
+            // Calculate direction vector
+            double dx = endX - startX;
+            double dy = endY - startY;
+            double length = Math.sqrt(dx*dx + dy*dy);
+            double unitX = dx / length;
+            double unitY = dy / length;
+            
+            // Calculate animation point (moves along the path)
+            double animDistance = length * Math.min(progress * 2, 1.0); // Double speed, but cap at target
+            int animX = (int)(startX + unitX * animDistance);
+            int animY = (int)(startY + unitY * animDistance);
+            
+            // Draw targeting line
+            g2d.setColor(new Color(255, 0, 0, 150));
+            g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 
+                        0, new float[]{10, 5}, 0)); // Dashed line
+            g2d.drawLine(startX, startY, endX, endY);
+            
+            // Draw moving projectile
+            int projectileSize = 12;
+            g2d.setColor(new Color(255, 50, 50));
+            g2d.fillOval(animX - projectileSize/2, animY - projectileSize/2, projectileSize, projectileSize);
+            g2d.setColor(Color.WHITE);
+            g2d.fillOval(animX - projectileSize/4, animY - projectileSize/4, projectileSize/2, projectileSize/2);
         }
         
         @Override
@@ -349,6 +399,36 @@ public class TeamfightWindow extends JFrame {
                     g2d.drawString(statsText, position.x - 20, position.y + CHARACTER_SIZE + 25);
                 }
             });
+
+            // Draw attack indication
+            if (currentAttacker != null && currentDefender != null) {
+                long elapsed = System.currentTimeMillis() - attackAnimationStartTime;
+                float progress = Math.min(1.0f, elapsed / (float)ATTACK_ANIMATION_DURATION);
+                
+                // Highlight attacker
+                Point attackerPos = characterPositions.get(currentAttacker);
+                Point defenderPos = characterPositions.get(currentDefender);
+                
+                if (attackerPos != null && defenderPos != null) {
+                    // Draw highlight around attacker
+                    g2d.setColor(new Color(255, 215, 0, 150)); // Golden glow
+                    g2d.setStroke(new BasicStroke(4.0f));
+                    g2d.drawRect(attackerPos.x - 5, attackerPos.y - 5, 
+                                CHARACTER_SIZE + 10, CHARACTER_SIZE + 10);
+                    
+                    // Draw targeting arrow
+                    drawTargetingArrow(g2d, attackerPos, defenderPos, progress);
+                    
+                    // Draw highlight around defender (pulsing red)
+                    float pulseAlpha = (float)(0.3 + 0.4 * Math.sin(progress * Math.PI * 4));
+                    pulseAlpha = Math.min(pulseAlpha, 1.0f);
+                    pulseAlpha = Math.max(pulseAlpha, 0.0f);
+                    g2d.setColor(new Color(255, 0, 0, (int)(pulseAlpha * 255)));
+                    g2d.setStroke(new BasicStroke(3.0f));
+                    g2d.drawRect(defenderPos.x - 3, defenderPos.y - 3, 
+                                CHARACTER_SIZE + 6, CHARACTER_SIZE + 6);
+                }
+            }
             
             // Draw graveyard characters
             int graveyardY = 100;

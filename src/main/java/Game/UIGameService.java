@@ -109,6 +109,7 @@ public class UIGameService {
                         refreshOrCreateHistory();
                         if (matchLog != null)
                             refreshOrCreateMatchLog(matchLog);
+                        refreshOrCreateTeamInfo();
                         try {
                             game.cleanUpPostSeasonAndPrepareForNewSeason();
                             game.countDownLatch();
@@ -151,6 +152,7 @@ public class UIGameService {
                         refreshOrCreateMatchLog(matchLog);
                         refreshOrCreateStandings(currentSeason);
                         refreshOrCreateHistory();
+                        refreshOrCreateTeamInfo();
 
                         try {
                             Thread.sleep(100);
