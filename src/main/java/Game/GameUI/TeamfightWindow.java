@@ -26,8 +26,8 @@ public class TeamfightWindow extends JFrame {
     private JLabel roundLabel;
     private CountDownLatch latch;
     
-    public TeamfightWindow(List<Hero> team1, List<Hero> team2, CountDownLatch latch) {
-        fightSimulation = new FightSimulation(team1, team2);
+    public TeamfightWindow(FightSimulation fightSimulation, List<Hero> team1, List<Hero> team2, CountDownLatch latch) {
+        this.fightSimulation = fightSimulation;
         initializeWindow();
         initializeGame();
         this.latch = latch;

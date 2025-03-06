@@ -13,17 +13,20 @@ import GameObjects.HerosAndClasses.Hero;
 import GameObjects.HerosAndClasses.HeroEnum;
 import GameObjects.HerosAndClasses.HeroFactory;
 import GameObjects.HerosAndClasses.HeroStatsTrackers;
+import GameObjects.TeamsAndPlayers.Team;
 
 public class FightSimulation {
     private HeroFactory hf;
-    private List<Hero> team1;
-    private List<Hero> team2;
+    private List<Hero> team1Heroes;
+    private List<Hero> team2Heroes;
     private List<MatchHero> team1MatchHeroes;
     private List<MatchHero> team2MatchHeroes;
     private List<Integer> attackingOrder;
     private List<Integer> defendingOrder;
     private int round;
     private Random random;
+    private Team winner;
+    private Team[] teams;
 
      // Damage tracking data structures
      private Map<MatchHero, Map<MatchHero, Integer>> damageDealt; // Who dealt damage to whom
@@ -41,9 +44,10 @@ public class FightSimulation {
      * @param team1
      * @param team2
      */
-    public FightSimulation(List<Hero> team1, List<Hero> team2) {
-        this.team1 = team1;
-        this.team2 = team2;
+    public FightSimulation(Team[] teams,List<Hero> team1Heroes, List<Hero> team2Heroes) {
+        this.team1Heroes = team1Heroes;
+        this.team2Heroes = team2Heroes;
+        this.teams = teams;
         this.round = 1;
         this.random = new Random();
         this.damageDealt = new HashMap<>();
@@ -91,7 +95,7 @@ public class FightSimulation {
         team1MatchHeroes = new ArrayList<>();
         team2MatchHeroes = new ArrayList<>();
         
-        for (Hero hero : team1) {
+        for (Hero hero : team1Heroes) {
             MatchHero matchHero = hero.generateMatchHero(1);
             team1MatchHeroes.add(matchHero);
 
@@ -100,7 +104,7 @@ public class FightSimulation {
              totalDamageDealt.put(matchHero, 0);
              totalDamageTaken.put(matchHero, 0);
         }
-        for (Hero hero : team2) {
+        for (Hero hero : team2Heroes) {
             MatchHero matchHero = hero.generateMatchHero(2);
             team2MatchHeroes.add(matchHero);
 
@@ -189,6 +193,11 @@ public class FightSimulation {
 
             battlePanel.updateTeams(team1MatchHeroes, team2MatchHeroes);
         }
+        if (team1MatchHeroes.isEmpty()) {
+            this.winner = teams[0];
+        } else if (team2MatchHeroes.isEmpty()) {
+            this.winner = teams[1];
+        }
     }
 
     public void simulateRound() {
@@ -231,14 +240,12 @@ public class FightSimulation {
         List<Hero> loser;
         if (team1MatchHeroes.isEmpty()) {
            // System.out.println("Team 2 wins!");
-            winner = team2;
-            loser = team1;
-            printMatchStatistics(2);
+            winner = team2Heroes;
+            loser = team1Heroes;
         } else {
            // System.out.println("Team 1 wins!");
-            winner = team1;
-            loser = team2;
-            printMatchStatistics(1);
+            winner = team1Heroes;
+            loser = team2Heroes;
         }
 
         for (int i = 0; i < winner.size(); i++) {
@@ -256,9 +263,10 @@ public class FightSimulation {
     }
 
     // Print detailed match statistics
-    public void printMatchStatistics(int winningTeam) {
-        System.out.println("\n========== MATCH STATISTICS ==========");
-        System.out.println("Team " + winningTeam + " won the match!");
+    public String getMatchStatistics() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("\n========== MATCH STATISTICS ==========");
+        ret.append("\nTeam " + winner.getTeamName() + " won the match!");
         
         // Print MVP (most damage dealt)
         MatchHero mvp = null;
@@ -272,66 +280,68 @@ public class FightSimulation {
         }
         
         if (mvp != null) {
-            System.out.println("\nMVP: " + mvp.getClass() + " (Team " + mvp.getTeam() + ")");
-            System.out.println("Total Damage: " + maxDamage);
-            System.out.println("Killing Blows: " + countKillingBlows(mvp));
+            ret.append("\nMVP: " + mvp.getClass() + " (Team " + mvp.getTeam() + ")");
+            ret.append("\nTotal Damage: " + maxDamage);
+            ret.append("\nKilling Blows: " + countKillingBlows(mvp));
         }
         
         // Print Team 1 stats
-        System.out.println("\n--- TEAM 1 STATISTICS ---");
-        printTeamStatistics(team1);
+        ret.append("\n--- TEAM 1 STATISTICS ---");
+        ret.append(getTeamStatistics(team1Heroes));
         
         // Print Team 2 stats
-        System.out.println("\n--- TEAM 2 STATISTICS ---");
-        printTeamStatistics(team2);
+        ret.append("\n--- TEAM 2 STATISTICS ---");
+        ret.append(getTeamStatistics(team2Heroes));
         
         // Print killing blow information
-        System.out.println("\n--- KILLING BLOWS ---");
+        ret.append("\n--- KILLING BLOWS ---");
         for (Map.Entry<MatchHero, MatchHero> entry : killingBlows.entrySet()) {
             MatchHero victim = entry.getKey();
             MatchHero killer = entry.getValue();
         }
         
-        System.out.println("=====================================\n");
+        ret.append("=====================================\n");
+        return ret.toString();
     }
     
     // Helper method to print statistics for a team
-    private void printTeamStatistics(List<Hero> team) {
+    private String getTeamStatistics(List<Hero> team) {
+        StringBuilder ret = new StringBuilder();
         for (Hero hero : team) {
             for (MatchHero matchHero : damageDealt.keySet()) {
                 if (matchHero.getHeroEnum() == hero.getHeroEnum()) {
-                    System.out.println(matchHero.getHeroEnum() + " (" + matchHero.getType() + "):");
-                    System.out.println("  Total Damage Dealt: " + totalDamageDealt.get(matchHero));
-                    System.out.println("  Total Damage Taken: " + totalDamageTaken.get(matchHero));
-                    System.out.println("  Killing Blows: " + countKillingBlows(matchHero));
+                    ret.append(matchHero.getHeroEnum() + " (" + matchHero.getType() + "):");
+                    ret.append("  Total Damage Dealt: " + totalDamageDealt.get(matchHero));
+                    ret.append("  Total Damage Taken: " + totalDamageTaken.get(matchHero));
+                    ret.append("  Killing Blows: " + countKillingBlows(matchHero));
                     
                     // Print damage breakdown if the hero dealt any damage
                     Map<MatchHero, Integer> herosDamage = damageDealt.get(matchHero);
                     if (!herosDamage.isEmpty()) {
-                        System.out.println("  Damage Breakdown:");
+                        ret.append("  Damage Breakdown:");
                         for (Map.Entry<MatchHero, Integer> entry : herosDamage.entrySet()) {
-                            System.out.println("    → " + entry.getKey().getHeroEnum() + 
-                                               " (Team " + entry.getKey().getTeam() + "): " + 
+                            ret.append("    → " + entry.getKey().getHeroEnum() + " (Team " + entry.getKey().getTeam() + "): " + 
                                                entry.getValue() + " damage");
                         }
                     }
                     
                     // Check if this hero is still alive
                     if (matchHero.isAlive()) {
-                        System.out.println("  Status: Alive with " + matchHero.getHp() + " HP remaining");
+                        ret.append("  Status: Alive with " + matchHero.getHp() + " HP remaining");
                     } else {
                         MatchHero killer = killingBlows.get(matchHero);
                         if (killer != null) {
-                            System.out.println("  Status: Killed by " + killer.getHeroEnum() + 
+                            ret.append("  Status: Killed by " + killer.getHeroEnum() + 
                                                " (Team " + killer.getTeam() + ")");
                         } else {
-                            System.out.println("  Status: Dead");
+                            ret.append("  Status: Dead");
                         }
                     }
                     break;
                 }
             }
         }
+        return ret.toString();
     }
     
     // Count how many killing blows a hero got

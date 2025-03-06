@@ -28,11 +28,13 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.SwingWorker;
 import javax.swing.JButton;
+import javax.swing.AbstractButton;
+import javax.swing.JToggleButton;
 
 public class UIGameService {
 
     private Game game;
-    private Map<JButton, ActionListener> buttonToActionListenerMap = new HashMap<>();
+    private Map<AbstractButton, ActionListener> buttonToActionListenerMap = new HashMap<>();
     private JButton playSeasonButton;
     private JButton playGameButton;
     private JButton seeStandingsButton;
@@ -45,6 +47,7 @@ public class UIGameService {
     private JButton saveGameButton;
     private JButton loadGameButton;
     private JButton seeHistoryButton;
+    private JToggleButton simulateMatchesButton;
     private GameUIGenerator gameUIGenerator;
 
     private static final String TEAMINFO_PANELLID = "teamInfo";
@@ -52,6 +55,7 @@ public class UIGameService {
     private static final String MATCHLOG_PANELID = "matchLog";
     private static final String STANDINGS_PANELID = "standings";
     private static final String HISTORY_PANELID = "history";
+    private Boolean playSimulation = true;
 
     private CountDownLatch latch;
 
@@ -68,6 +72,7 @@ public class UIGameService {
         this.saveGameButton = gameControllerUI.getSaveGameButton();
         this.loadGameButton = gameControllerUI.getLoadGameButton();
         this.seeHistoryButton = gameControllerUI.getSeeHistoryButton();
+        this.simulateMatchesButton = gameControllerUI.getSimulateMatchesButton();
         this.game = game;
         this.gameUIGenerator = new GameUIGenerator();
         this.latch = latch;
@@ -79,6 +84,21 @@ public class UIGameService {
      * @param currentSeason
      */ 
     void setupActionListeners() {
+
+        ActionListener JToggleButtonListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (simulateMatchesButton.isSelected()) {
+                    simulateMatchesButton.setText("Simulate Matches: OFF");
+                    playSimulation = false;
+                } else {
+                    simulateMatchesButton.setText("Simulate Matches: ON");
+                    playSimulation = true;
+                }
+            }
+        };
+        buttonToActionListenerMap.put(simulateMatchesButton, JToggleButtonListener);
+        simulateMatchesButton.addActionListener(JToggleButtonListener);
 
         ActionListener playSeasonListener = new ActionListener() {
             @Override
@@ -137,7 +157,7 @@ public class UIGameService {
                     @Override
                     protected Void doInBackground() throws Exception {  
                         currentSeason = game.getSeasonsToPlay().peek();   
-                        matchLog = game.playMatch(currentSeason, false);
+                        matchLog = game.playMatch(currentSeason, playSimulation);
                         return null;
                     }
 
@@ -191,7 +211,7 @@ public class UIGameService {
 
                         if (teamGamePlayable) {
                             do {
-                                matchLog = game.playMatch(currentSeason, false);
+                                matchLog = game.playMatch(currentSeason, playSimulation);
                             } while (matchLog != null && (matchLog.getWinner() != playingTeam && matchLog.getLoser() != playingTeam));
                         }
                         return null;

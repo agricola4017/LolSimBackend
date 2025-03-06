@@ -17,11 +17,13 @@ public class GameControllerUI {
     private JButton saveGameButton;
     private JButton loadGameButton;
     private JButton seeHistoryButton;
+    private JToggleButton simulateMatchesButton;
+    
     public GameControllerUI() {
         // Create the frame
         JFrame frame = new JFrame("Game Options");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
+        frame.setSize(400, 350);
         //frame.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 
@@ -30,9 +32,11 @@ public class GameControllerUI {
         playSeasonButton = new JButton("Play Season");
         playGameButton = new JButton("Play Game");
         playTeamGameButton = new JButton("Play Team Game");
+        simulateMatchesButton = new JToggleButton("Simulate Matches: ON");
         playPanel.add(playSeasonButton);
         playPanel.add(playGameButton);
         playPanel.add(playTeamGameButton);
+        playPanel.add(simulateMatchesButton);
 
         JPanel seePanel = new JPanel(new FlowLayout());
         seeTeamInfoButton = new JButton("See Team Info");
@@ -117,5 +121,9 @@ public class GameControllerUI {
 
     public JButton getSeeHistoryButton() {
         return seeHistoryButton;
+    }
+
+    public JToggleButton getSimulateMatchesButton() {
+        return simulateMatchesButton;
     }
 }

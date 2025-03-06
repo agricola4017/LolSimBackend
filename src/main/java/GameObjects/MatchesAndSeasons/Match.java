@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
+import Game.GameUI.GameUIGenerator;
 import Game.GameUI.TeamfightWindow;
 
 import static Functions.Functions.rollPercentile;
@@ -202,24 +203,29 @@ public class Match extends MatchAbstract {
 
     public void playTeamfights() {
         for (int i = 0; i < 3; i++) {
-            FightSimulation fs = new FightSimulation(team1heroes, team2heroes);
+            FightSimulation fs = new FightSimulation(teams, team1heroes, team2heroes);
             fs.generateMatchHeroes();
             fs.simulateRound();
         }
     }
 
     public void playSimulatedTeamfights() {
-        for (int i = 0; i < 3; i++) {
+        GameUIGenerator gameUIGen = new GameUIGenerator();
+        for (int i = 0; i < 1; i++) {
             CountDownLatch latch = new CountDownLatch(1);
 
             SwingUtilities.invokeLater(() -> {
-                TeamfightWindow tfw = new TeamfightWindow(team1heroes, team2heroes, latch);
+                FightSimulation fs = new FightSimulation(teams, team1heroes, team2heroes);
+                TeamfightWindow tfw = new TeamfightWindow(fs, team1heroes, team2heroes, latch);
                 tfw.setVisible(true);
 
                 tfw.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosed(WindowEvent e) {
                         latch.countDown();
+                        gameUIGen.createOrUpdateTextPanel(
+                            "Fight Statistics", "Fight Statistics", 
+                            fs.getMatchStatistics());
                     }
                 });
             });

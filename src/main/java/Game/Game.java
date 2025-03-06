@@ -384,11 +384,11 @@ public class Game {
      * @param currentSeason: the season to play the match from
      * @return the match log of the match
      */
-    MatchLog playMatch(Season currentSeason, Boolean skip) {
+    MatchLog playMatch(Season currentSeason, Boolean playSimulation) {
         //validation should be moved to the controller 
         if (!currentSeason.isFinished()) {
             Match match;
-            if (!skip && currentSeason.isTeamInNextSeries(playingTeam)) {
+            if (playSimulation && currentSeason.isTeamInNextSeries(playingTeam)) {
                 match = currentSeason.playSimulatedMatch();
             } else {
                 match = currentSeason.playMatch();
@@ -449,7 +449,7 @@ public class Game {
                 declineChance = 24 + (int)Math.round(((age - 30) * 0.5));
             } else {
                 improvementChance = 15;
-                declineChance = 18;
+                declineChance = 25;
             }
 
             player.setAge(age + 1);
