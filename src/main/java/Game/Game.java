@@ -309,6 +309,7 @@ public class Game {
                     teamlessPlayers.add(worst);
                     worst.resetYearsStartingWithTeam();
                     worst.resetYearsWithTeam();
+                    activePlayers.remove(worst);
                 }
             }
         }
@@ -362,7 +363,7 @@ public class Game {
         //this validation should be moved to the controller 
         while (!currentSeason.isFinished()) {
 
-            matchLog = playMatch(currentSeason, true);
+            matchLog = playMatch(currentSeason, false);
             /** 
             if (count > currentSeason.getOneSetCount()) {
                 count = 1;
@@ -447,9 +448,12 @@ public class Game {
                 //decline is 24 to 26
                 improvementChance = 30 - ((age - 30) * 1);
                 declineChance = 24 + (int)Math.round(((age - 30) * 0.5));
-            } else {
+            } else if (age <= 40) {
                 improvementChance = 15;
                 declineChance = 25;
+            } else {
+                improvementChance = 5;
+                declineChance = 35;
             }
 
             player.setAge(age + 1);
