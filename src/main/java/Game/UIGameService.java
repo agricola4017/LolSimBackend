@@ -458,7 +458,7 @@ public class UIGameService {
         ));
         
         // Add the roster data
-        tables.put("Team Roster", new TableData(
+        tables.put("Starting Roster", new TableData(
             team.getPlayerRoster().getRosterData(),
             team.getPlayerRoster().getRosterColumnNames()
         ));
@@ -490,12 +490,6 @@ public class UIGameService {
         tables.put("Match Summary", new TableData(
             matchLog.getSummaryData(),
             matchLog.getSummaryColumnNames()
-        ));
-        
-        // Add the match result data
-        tables.put("Match Result", new TableData(
-            matchLog.getResultData(),
-            MatchLog.getResultColumnNames()
         ));
         
         // Add the winner team stats
