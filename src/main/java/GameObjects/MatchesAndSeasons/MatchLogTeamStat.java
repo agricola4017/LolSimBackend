@@ -85,12 +85,32 @@ public class MatchLogTeamStat {
         return positionToPlayerMap;
     }
 
-    /*@Override
-    public String toString() {
-        return "MatchLogTeamStat{" +
-                "playerToPlayerStatMap=" + playerToPlayerStatMap +
-                '}';
-    }*/
+    public Team getTeam() {
+        return team;
+    }
+
+    public static String[] getColumnNames() {
+        return new String[]{"Position", "Hero", "KDA", "CS", "GOLD", "OVR"};
+    }
+
+    public String[][] getData() {
+        String[][] data = new String[positionToPlayerMap.size()][6];
+        int row = 0;
+        for (Map.Entry<Position, Player> positionToPlayer : positionToPlayerMap.entrySet()) {
+            Player player = positionToPlayer.getValue();
+            Position position = positionToPlayer.getKey();
+            MatchLogPlayerStat matchLogPlayerStat = playerToPlayerStatMap.get(player);
+            
+            data[row][0] = position.toString();
+            data[row][1] = player.getPlayerName();
+            data[row][2] = matchLogPlayerStat.getKills() + "/" + matchLogPlayerStat.getDeaths();
+            data[row][3] = String.valueOf(matchLogPlayerStat.getCs());
+            data[row][4] = String.valueOf(matchLogPlayerStat.getGold());
+            data[row][5] = player.getStat().getOVR() + "/" + player.getStat().getPotential();
+            row++;
+        }
+        return data;
+    }
 
     @Override
     public String toString() {

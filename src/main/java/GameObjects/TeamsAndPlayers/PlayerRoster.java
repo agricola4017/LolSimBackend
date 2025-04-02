@@ -111,11 +111,67 @@ public class PlayerRoster implements Serializable {
         }
         return (int) Math.round(agg/5);
     }
+    public String[] getRosterColumnNames() {
+        return new String[]{
+            "Position",
+            "Name",
+            "OVR",
+            "POT",
+            "OVR Δ",
+            "POT Δ",
+            "KDA",
+            "CS/Gold",
+            "Age",
+            "YWT",
+            "YSWT",
+            "Contract"
+        };
+    }
+
+    public String[][] getRosterData() {
+        String[][] data = new String[Position.values().length][12];
+        int row = 0;
+        for (Position p : Position.values()) {
+            Player player = activePlayers.get(p);
+            data[row][0] = p.toString();
+            if (player != null) {
+                int[] stats = player.getSeasonStats();
+                data[row][1] = player.getPlayerName();
+                data[row][2] = String.valueOf(player.getOVR());
+                data[row][3] = String.valueOf(player.getStat().getPotential());
+                data[row][4] = (player.getStat().getOVR() - player.getOVR() >= 0 ? "+" : "") + 
+                              (player.getStat().getOVR() - player.getOVR());
+                data[row][5] = (player.getStat().getPotential() - player.getStat().getPotential() >= 0 ? "+" : "") + 
+                              (player.getStat().getPotential() - player.getStat().getPotential());
+                data[row][6] = stats[0] + "/" + stats[1];
+                data[row][7] = stats[2] + " / " + stats[3];
+                data[row][8] = String.valueOf(player.getAge());
+                data[row][9] = String.valueOf(player.getYearsWithTeam());
+                data[row][10] = String.valueOf(player.getYearsStartingWithTeam());
+                data[row][11] = String.valueOf(player.getValue());
+            } else {
+                data[row][1] = "Empty";
+                data[row][2] = "-";
+                data[row][3] = "-";
+                data[row][4] = "-";
+                data[row][5] = "-";
+                data[row][6] = "-";
+                data[row][7] = "-";
+                data[row][8] = "-";
+                data[row][9] = "-";
+                data[row][10] = "-";
+                data[row][11] = "-";
+            }
+            row++;
+        }
+        return data;
+    }
+
     @Override
     public String toString() {
         String ret = "PlayerRoster: \n";
         ret += "------------------------\n";
-        ret += "Position | " + Player.toStringHeaders() + "\n";
+        ret += "Position | " + Player.getColumnHeaders() + "\n";
         for (Position p : Position.values()) {
             ret += p + " | " + activePlayers.get(p) + "\n";
         }
@@ -123,3 +179,4 @@ public class PlayerRoster implements Serializable {
         return ret;
     }
 }
+

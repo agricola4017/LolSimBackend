@@ -468,4 +468,13 @@ public class Game {
     void selectTeam(Team team) {
         playingTeam = team;
     }
+
+    public Team getTeamByName(String teamName) {
+        for (Team team : teams) {
+            if (team.getTeamName().equals(teamName)) {
+                return team;
+            }
+        }
+        return null;
+    }
 }

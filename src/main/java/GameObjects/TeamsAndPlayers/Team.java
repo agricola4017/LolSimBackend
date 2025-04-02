@@ -16,18 +16,20 @@ public class Team implements Serializable {
 
     private int wins;
     private int standing;
-    private int avgPlacement;
+    private double avgPlacement;
+    private int teamOVR;
+    private Set<Player> benchedPlayers;
 
     public Team(int teamID, String teamName) {
         this.teamID = teamID;
         this.teamName = teamName;
         this.players = new ArrayList<>();
         this.playerRoster = new PlayerRoster();
-
-        this.wins=0;
-        this.standing=0;
-        this.avgPlacement=0;
-        
+        this.wins = 0;
+        this.standing = 0;
+        this.avgPlacement = 0.0;
+        this.teamOVR = 0;
+        this.benchedPlayers = new HashSet<>();
     }
 
     public Team(int teamID, String teamName, List<Player> players) {
@@ -35,10 +37,21 @@ public class Team implements Serializable {
         this.teamName = teamName;
         this.players = players;
         this.playerRoster = new PlayerRoster(players);
+        this.wins = 0;
+        this.standing = 0;
+        this.avgPlacement = 0.0;
+        this.teamOVR = playerRoster.getOVR();
+        this.benchedPlayers = new HashSet<>();
+    }
 
-        this.wins=0;
-        this.standing=0;
-        this.avgPlacement=0;
+    public Team(int teamID, String teamName, PlayerRoster playerRoster) {
+        this.teamID = teamID;
+        this.teamName = teamName;
+        this.playerRoster = playerRoster;
+        this.wins = 0;
+        this.avgPlacement = 0.0;
+        this.teamOVR = playerRoster.getOVR();
+        this.benchedPlayers = new HashSet<>();
     }
 
     public void addPlacement(int placement, int seasonsPlayed) {
@@ -116,6 +129,44 @@ public class Team implements Serializable {
         this.standing = pos;
     }
 
+    public String[] getTeamColumnNames() {
+        return new String[]{
+            "Stat",
+            "Value"
+        };
+    }
+
+    public String[][] getTeamData(Standing standing) {
+        String[][] data = new String[6][2];
+        data[0] = new String[]{"Team ID", String.valueOf(teamID)};
+        data[1] = new String[]{"Team Name", teamName};
+        data[2] = new String[]{"Wins", String.valueOf(wins)};
+        data[3] = new String[]{"Average Placement", String.valueOf(avgPlacement)};
+        data[4] = new String[]{"Team OVR", String.valueOf(teamOVR)};
+        data[5] = new String[]{"Standing", standing != null ? standing.toString() : ""};
+        return data;
+    }
+
+    public String[][] getBenchedPlayersData() {
+        Set<Player> benchedPlayers = getBenchedPlayers();
+        String[][] data = new String[benchedPlayers.size()][];
+        int i = 0;
+        for (Player player : benchedPlayers) {
+            data[i++] = player.getPlayerData();
+        }
+        return data;
+    }
+
+    public Set<Player> getBenchedPlayers() {
+        benchedPlayers.clear();
+        for (Player p : this.players) {
+            if (!playerRoster.getActivePlayers().values().contains(p)) {
+                benchedPlayers.add(p);
+            }
+        }
+        return benchedPlayers;
+    }
+
     @Override
     public String toString() {
         String ret = "";
@@ -123,18 +174,17 @@ public class Team implements Serializable {
         ret += "Team Name=" + teamName + "\n" +
                 "Wins=" + wins + "\n" +
                 "Average Placement=" + avgPlacement + "\n" +
-                "OVR=" + playerRoster.getOVR() + "\n" +
-                //", players=" + players +
+                "OVR=" + teamOVR + "\n" +
                 "Roster=" + playerRoster;
 
-        Set<Player> parsedPlayers = new HashSet<>(playerRoster.getActivePlayers().values());
+        Set<Player> benchedPlayers = new HashSet<>(this.playerRoster.getActivePlayers().values());
 
-        for (Player p : players) {
-            if (parsedPlayers.contains(p)) {
+        for (Player p : this.players) {
+            if (benchedPlayers.contains(p)) {
                 continue;
             } else {
                 ret += p + "\n";
-                parsedPlayers.add(p);
+                benchedPlayers.add(p);
             }
         }
         return ret;

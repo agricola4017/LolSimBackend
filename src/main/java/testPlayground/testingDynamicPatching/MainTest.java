@@ -18,12 +18,12 @@ public class MainTest {
             List<Hero> team1 = new ArrayList<>();
             List<Hero> team2 = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
-                team1.add(hf.createHero());
-                team2.add(hf.createHero());
+                team1.add(HeroFactory.createHero());
+                team2.add(HeroFactory.createHero());
             }
-            TeamfightWindow window = new TeamfightWindow(team1, team2);
-            window.setVisible(true);
-            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            //TeamfightWindow window = new TeamfightWindow(team1, team2);
+            //window.setVisible(true);
+            //window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         });
     }
 }

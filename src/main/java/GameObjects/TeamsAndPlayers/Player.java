@@ -262,7 +262,42 @@ public class Player implements Serializable {
                 " | " + yearsWithTeam + " | " + yearsStartingWithTeam;
     }
     
-    public static String toStringHeaders() {
+    public static String getColumnHeaders() {
         return "ID | Name | Age | main | Position | OVR/POT | KDA | CS/Gold | YWT | YSWT";
+    }
+
+    public static String[] getPlayerColumnNames() {
+        return new String[]{
+            "ID",
+            "Name",
+            "Age",
+            "Position",
+            "OVR",
+            "POT",
+            "OVR Δ",
+            "POT Δ",
+            "KDA",
+            "CS/Gold",
+            "YWT",
+            "YSWT"
+        };
+    }
+
+    public String[] getPlayerData() {
+        int gp = gamesPlayed == 0 ? 1 : gamesPlayed;
+        return new String[]{
+            String.valueOf(playerID),
+            playerName,
+            String.valueOf(age),
+            position.toString(),
+            String.valueOf(stat.getOVR()),
+            String.valueOf(stat.getPotential()),
+            (seasonalChange[0] >= 0 ? "+" : "") + seasonalChange[0],
+            (seasonalChange[1] >= 0 ? "+" : "") + seasonalChange[1],
+            kills/gp + "/" + deaths/gp,
+            cs/gp + " / " + gold/gp,
+            String.valueOf(yearsWithTeam),
+            String.valueOf(yearsStartingWithTeam)
+        };
     }
 }
