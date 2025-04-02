@@ -14,6 +14,7 @@ import java.io.IOException;
 import Functions.Functions;
 import Game.GameUI.GameControllerUI;
 import Game.GameUI.GameUIGenerator;
+import Game.GameUI.TableData;
 
 import java.awt.event.ActionListener;
 
@@ -76,6 +77,16 @@ public class UIGameService {
         this.game = game;
         this.gameUIGenerator = new GameUIGenerator();
         this.latch = latch;
+
+        
+        // Set up the team details callback
+        this.gameUIGenerator.setTeamDetailsCallback((panelId, teamName) -> {
+            // Find the team by name
+            Team team = game.getTeamByName(teamName);
+            if (team != null) {
+                refreshOrCreateTeamInfo(team, panelId);
+            }
+        });
     }
 
     /**
@@ -353,9 +364,8 @@ public class UIGameService {
                         return;
                     }
                     Team team = teamIDtoTeamMap.get(teamID);
-                    gameUIGenerator.updateIDForm("Find Team by ID", team.toString());
+                    refreshOrCreateTeamInfo(team);
                 });
-                
             }
         };
         findTeamButton.addActionListener(findTeamListener);
@@ -432,26 +442,85 @@ public class UIGameService {
     }
 
     void refreshOrCreateTeamInfo() {
-        Team playingTeam = game.getPlayingTeam();
-        Standing standing = game.getCurrentSeason().getStanding(playingTeam);
-        String teaminfo;
+        refreshOrCreateTeamInfo(game.getPlayingTeam());
+    }
 
-        //if didn't make playoffs
-        if (standing == null) {
-            teaminfo = playingTeam.toString();
-        }
-        else {
-            teaminfo = standing.toString() + "\n" + playingTeam.toString();
-        }
-        gameUIGenerator.createOrUpdateTextPanel(TEAMINFO_PANELLID, "Team Info", teaminfo);
+    void refreshOrCreateTeamInfo(Team team, String panelId) {
+        Standing standing = game.getCurrentSeason().getStanding(team);
+        
+        // Create a map of tables for the multi-table panel
+        Map<String, TableData> tables = new HashMap<>();
+        
+        // Add the team data
+        tables.put("Team Info", new TableData(
+            team.getTeamData(standing),
+            team.getTeamColumnNames()
+        ));
+        
+        // Add the roster data
+        tables.put("Team Roster", new TableData(
+            team.getPlayerRoster().getRosterData(),
+            team.getPlayerRoster().getRosterColumnNames()
+        ));
+
+        // Add the benched players data
+        tables.put("Benched Players", new TableData(
+            team.getBenchedPlayersData(),
+            Player.getPlayerColumnNames()
+        ));
+        
+        // Create the panel with the tables
+        gameUIGenerator.createOrUpdateTextMultiTablePanel(
+            panelId,
+            "Team Info",
+            "",
+            tables
+        );
+    }
+
+    void refreshOrCreateTeamInfo(Team team) {
+        refreshOrCreateTeamInfo(team, TEAMINFO_PANELLID);
     }
 
     void refreshOrCreateMatchLog(MatchLog matchLog) {
-        gameUIGenerator.createOrUpdateTextPanel(MATCHLOG_PANELID, "Match Log", matchLog.toString());
+        // Create a map of tables for the multi-table panel
+        Map<String, TableData> tables = new HashMap<>();
+        
+        // Add the match summary data first
+        tables.put("Match Summary", new TableData(
+            matchLog.getSummaryData(),
+            matchLog.getSummaryColumnNames()
+        ));
+        
+        // Add the match result data
+        tables.put("Match Result", new TableData(
+            matchLog.getResultData(),
+            MatchLog.getResultColumnNames()
+        ));
+        
+        // Add the winner team stats
+        tables.put("Winner Team Stats", new TableData(
+            matchLog.getTeamStatsData(matchLog.getWinner()),
+            MatchLog.getTeamStatsColumnNames()
+        ));
+        
+        // Add the loser team stats
+        tables.put("Loser Team Stats", new TableData(
+            matchLog.getTeamStatsData(matchLog.getLoser()),
+            MatchLog.getTeamStatsColumnNames()
+        ));
+        
+        // Create the panel with the tables
+        gameUIGenerator.createOrUpdateTextMultiTablePanel(
+            MATCHLOG_PANELID,
+            "Match Log",
+            "",  // Empty text since we don't need the MatchLog text
+            tables
+        );
     }   
 
     void refreshOrCreatePlayerInfo() {
-        gameUIGenerator.createOrUpdateTextPanel(PLAYERINFO_PANELLID, "Player Info", Player.toStringHeaders() + "\n" + flattenListString(game.getActivePlayers()));
+        gameUIGenerator.createOrUpdateTextPanel(PLAYERINFO_PANELLID, "Player Info", Player.getColumnHeaders() + "\n" + flattenListString(game.getActivePlayers()));
     }
 
 }
