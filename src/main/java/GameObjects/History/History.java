@@ -56,4 +56,25 @@ public class History implements Serializable{
          }
          return ret;
      }
+
+     public String[] getLeagueHistoryColumnNames() {
+        return new String[] {"Season", "Year", "Winner", "Runner Up"};
+     }
+
+     public String[][] getLeagueHistoryData() {
+        String [][] ret = new String[this.winningTeams.size()][getLeagueHistoryColumnNames().length];
+        int j = this.startYear - 1;
+        int arrayIndex = 0;  // Add a separate index for array access
+        for (int i = this.startYear; i < this.currSplitCount; i++) {
+            if ((i - this.startYear) % 2 == 0) {
+                j++;
+            }
+            ret[arrayIndex][0] = this.winningTeams.get(i).getSeasonName();
+            ret[arrayIndex][1] = String.valueOf(j);
+            ret[arrayIndex][2] = this.winningTeams.get(i).toString();
+            ret[arrayIndex][3] = this.runnerUpTeams.get(i).toString();
+            arrayIndex++;  // Increment the array index
+        }
+        return ret;
+     }
 }

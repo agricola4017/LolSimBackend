@@ -247,6 +247,39 @@ public abstract class Season implements Serializable {
         return standings.stream().map(Standing::getTeam).collect(Collectors.toList());
     }
 
+    public String[] getStandingsColumnNames() {
+        return new String[]{"Position", "Team", "Record", "Last 5", "OVR", "Previous Record"};
+    }
+
+    public String[][] getStandingsData() {
+        String[][] data = new String[standings.size()][getStandingsColumnNames().length];
+        
+        // Add standings data
+        for (int i = 0; i < standings.size(); i++) {
+            Standing standing = standings.get(i);
+            String positionAndTeam = (i + 1) + ". " + standing.getTeam().getTeamName();
+            String record = standing.getWins() + "-" + standing.getLosses();
+            String last5 = standing.getLast5Wins() + "-" + standing.getLast5Losses();
+            String ovr = String.valueOf(standing.getTeam().getPlayerRoster().getOVR());
+            String prevRecord = oldStandings != null && !oldStandings.isEmpty() && i < oldStandings.size() 
+                ? oldStandings.get(i).getWins() + "-" + oldStandings.get(i).getLosses() 
+                : "0-0";
+            
+            data[i][0] = String.valueOf(i + 1);
+            data[i][1] = standing.getTeam().getTeamName();
+            data[i][2] = record;
+            data[i][3] = last5;
+            data[i][4] = ovr;
+            data[i][5] = prevRecord;
+        }
+        
+        return data;
+    }
+
+    public String getStatusText() {
+        return isFinished() ? getName() + " Winner: " + getWinner().getTeamName() : getName() + " is in progress";
+    }
+
     public String toString() {
         String ret = "";
         

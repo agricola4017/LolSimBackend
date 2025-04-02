@@ -126,7 +126,6 @@ public class UIGameService {
                             System.exit(1);
                         }
                         refreshOrCreateStandings(currentSeason);
-                        refreshOrCreateHistory();
                         if (matchLog != null)
                             refreshOrCreateMatchLog(matchLog);
                         refreshOrCreateTeamInfo();
@@ -134,6 +133,8 @@ public class UIGameService {
                             game.cleanUpPostSeasonAndPrepareForNewSeason();
                             game.countDownLatch();
                             Thread.sleep(100);
+                            // Refresh history after cleanup is complete
+                            refreshOrCreateHistory();
                         } catch (InterruptedException ex) {
                             System.out.println("Interrupted");
                         }
@@ -423,13 +424,11 @@ public class UIGameService {
     }
 
     void refreshOrCreateHistory() {
-        gameUIGenerator.createOrUpdateTextPanel(HISTORY_PANELID, "History", game.getHistory().getLeagueHistory());
+        //gameUIGenerator.createOrUpdateTextPanel(HISTORY_PANELID, "History", game.getHistory().getLeagueHistory());
+        gameUIGenerator.createOrUpdateTextTablePanel(HISTORY_PANELID, "History", game.getHistory().getLeagueHistoryData(), game.getHistory().getLeagueHistoryColumnNames());
     }
     void refreshOrCreateStandings(Season currentSeason) {
-        String winner = "";
-        winner = currentSeason != null && currentSeason.isFinished() ? currentSeason.getName() + " Winner: " + currentSeason.getWinner().getTeamName() : currentSeason.getName() + " is in progress";
-        gameUIGenerator.createOrUpdateTextPanel(STANDINGS_PANELID, "Standings", 
-            winner + "\n" + game.getCurrentSeason().toString());
+        gameUIGenerator.createOrUpdateTextTablePanel(STANDINGS_PANELID, "Standings", currentSeason.getStatusText(), currentSeason.getStandingsData(), currentSeason.getStandingsColumnNames());
     }
 
     void refreshOrCreateTeamInfo() {

@@ -69,6 +69,20 @@ public class Standing implements Comparable<Standing>, Serializable {
         return team;
     }
 
+    public int getLast5Wins() {
+        int last5Wins = 0;
+        for (Boolean b : last5) {
+            if (b) {
+                last5Wins++;
+            }
+        }
+        return last5Wins;
+    }
+
+    public int getLast5Losses() {
+        return last5.size() - getLast5Wins();
+    }
+
     @Override
     public String toString() {
         // Logging the state of the team and its players
