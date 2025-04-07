@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 
 import Game.GameUI.GameUIGenerator;
 import Game.GameUI.TeamfightWindow;
+import Game.GameUI.TableData;
 
 import static Functions.Functions.rollPercentile;
 import GameObjects.HerosAndClasses.HeroFactory;
@@ -171,6 +172,22 @@ public class Match extends MatchAbstract {
         }
 
 
+        if (winner == team1) {
+            for (Hero hero : team1heroes) {
+                HeroFactory.getStatsTrackers(hero.getClassEnum()).addWin();
+            }
+            for (Hero hero : team2heroes) {
+                HeroFactory.getStatsTrackers(hero.getClassEnum()).addLoss();
+            }
+        } else {
+            for (Hero hero : team1heroes) {
+                HeroFactory.getStatsTrackers(hero.getClassEnum()).addLoss();
+            }   
+            for (Hero hero : team2heroes) {
+                HeroFactory.getStatsTrackers(hero.getClassEnum()).addWin();
+            }
+        }
+
         Map<Position, Player> team1PositionToPlayerMap = team1.getPlayerRoster().getActivePlayers();
         Map<Position, Player> team2PositionToPlayerMap = team2.getPlayerRoster().getActivePlayers();
 
@@ -202,7 +219,7 @@ public class Match extends MatchAbstract {
     }
 
     public void playTeamfights() {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             FightSimulation fs = new FightSimulation(teams, team1heroes, team2heroes);
             fs.generateMatchHeroes();
             fs.simulateRound();
@@ -223,9 +240,13 @@ public class Match extends MatchAbstract {
                     @Override
                     public void windowClosed(WindowEvent e) {
                         latch.countDown();
-                        gameUIGen.createOrUpdateTextPanel(
-                            "Fight Statistics", "Fight Statistics", 
-                            fs.getMatchStatistics());
+                        String[] columnNames = fs.getTeamStatisticsColumnNames();
+                        String[][] team1data = fs.getTeamStatisticsData(team1heroes);
+                        String[][] team2data = fs.getTeamStatisticsData(team2heroes);
+                        Map<String, TableData> tables = new HashMap<>();
+                        tables.put("Team 1", new TableData(team1data, columnNames));
+                        tables.put("Team 2", new TableData(team2data, columnNames));
+                        gameUIGen.createOrUpdateTextMultiTablePanel("Fight Statistics", "Fight Statistics", fs.getFightLog(), tables);
                     }
                 });
             });

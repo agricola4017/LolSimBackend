@@ -30,4 +30,10 @@ public class HeroStatsTrackers {
         losses = 0;
     }
 
+    public double getWinrate() {
+        if (wins + losses == 0) {
+            return 0.5;
+        }
+        return (double) wins / (wins + losses);
+    }
 }

@@ -262,6 +262,31 @@ public class FightSimulation {
         HeroEnum.resetAvailableHeroes();
     }
 
+    public String getFightLog() {
+        
+        StringBuilder ret = new StringBuilder();
+        ret.append("\nTeam " + winner.getTeamName() + " won the match!");
+
+         // Print MVP (most damage dealt)
+         MatchHero mvp = null;
+         int maxDamage = 0;
+         
+         for (Map.Entry<MatchHero, Integer> entry : totalDamageDealt.entrySet()) {
+             if (entry.getValue() > maxDamage) {
+                 maxDamage = entry.getValue();
+                 mvp = entry.getKey();
+             }
+         }
+         
+         if (mvp != null) {
+             ret.append("\nMVP: " + mvp.getClass() + " (Team " + mvp.getTeam() + ")");
+             ret.append("\nTotal Damage: " + maxDamage);
+             ret.append("\nKilling Blows: " + countKillingBlows(mvp));
+         }
+
+         return ret.toString();
+    }
+
     // Print detailed match statistics
     public String getMatchStatistics() {
         StringBuilder ret = new StringBuilder();
@@ -344,6 +369,121 @@ public class FightSimulation {
         return ret.toString();
     }
     
+    /**
+     * Get column names for team statistics table
+     * @return String array of column headers
+     */
+    public String[] getTeamStatisticsColumnNames() {
+        return new String[] {
+            "Hero", 
+            "Type", 
+            "Damage Dealt", 
+            "Damage Taken", 
+            "Killing Blows", 
+            "Victims",
+            "Damage Breakdown", 
+            "Status"
+        };
+    }
+
+     /**
+     * Get team statistics data in a 2D array format
+     * @param team List of heroes to get statistics for
+     * @return 2D String array containing hero statistics
+     */
+    public String[][] getTeamStatisticsData(List<Hero> team) {
+        // Count how many heroes we'll actually have data for
+        int rowCount = 0;
+        for (Hero hero : team) {
+            for (MatchHero matchHero : damageDealt.keySet()) {
+                if (matchHero.getHeroEnum() == hero.getHeroEnum()) {
+                    rowCount++;
+                    break;
+                }
+            }
+        }
+        
+        // Create the array with the exact size we need
+        String[][] data = new String[rowCount][getTeamStatisticsColumnNames().length];
+        int rowIndex = 0;
+        
+        for (Hero hero : team) {
+            for (MatchHero matchHero : damageDealt.keySet()) {
+                if (matchHero.getHeroEnum() == hero.getHeroEnum()) {
+                    // Fill row data
+                    data[rowIndex][0] = matchHero.getHeroEnum().toString();
+                    data[rowIndex][1] = matchHero.getType().toString();
+                    data[rowIndex][2] = totalDamageDealt.get(matchHero).toString();
+                    data[rowIndex][3] = totalDamageTaken.get(matchHero).toString();
+                    data[rowIndex][4] = String.valueOf(countKillingBlows(matchHero));
+                    
+                    // Find victims of this hero (from killing blows map)
+                    StringBuilder victims = new StringBuilder();
+                    boolean firstVictim = true;
+                    for (Map.Entry<MatchHero, MatchHero> entry : killingBlows.entrySet()) {
+                        MatchHero victim = entry.getKey();
+                        MatchHero killer = entry.getValue();
+                        
+                        if (killer.getHeroEnum() == matchHero.getHeroEnum()) {
+                            if (!firstVictim) {
+                                victims.append("; ");
+                            }
+                            victims.append(victim.getHeroEnum())
+                                .append(" (Team ")
+                                .append(victim.getTeam())
+                                .append(")");
+                            firstVictim = false;
+                        }
+                    }
+                    
+                    if (victims.length() == 0) {
+                        victims.append("None");
+                    }
+                    data[rowIndex][5] = victims.toString();
+                    
+                    // Build damage breakdown string
+                    StringBuilder damageBreakdown = new StringBuilder();
+                    Map<MatchHero, Integer> herosDamage = damageDealt.get(matchHero);
+                    if (!herosDamage.isEmpty()) {
+                        boolean first = true;
+                        for (Map.Entry<MatchHero, Integer> entry : herosDamage.entrySet()) {
+                            if (!first) {
+                                damageBreakdown.append("; ");
+                            }
+                            damageBreakdown.append(entry.getKey().getHeroEnum())
+                                        .append(" (Team ")
+                                        .append(entry.getKey().getTeam())
+                                        .append("): ")
+                                        .append(entry.getValue())
+                                        .append(" damage");
+                            first = false;
+                        }
+                    } else {
+                        damageBreakdown.append("None");
+                    }
+                    data[rowIndex][5] = damageBreakdown.toString();
+                    
+                    // Build status string
+                    if (matchHero.isAlive()) {
+                        data[rowIndex][6] = "Alive with " + matchHero.getHp() + " HP remaining";
+                    } else {
+                        MatchHero killer = killingBlows.get(matchHero);
+                        if (killer != null) {
+                            data[rowIndex][6] = "Killed by " + killer.getHeroEnum() + 
+                                    " (Team " + killer.getTeam() + ")";
+                        } else {
+                            data[rowIndex][6] = "Dead";
+                        }
+                    }
+                    
+                    rowIndex++;
+                    break;
+                }
+            }
+        }
+        
+        return data;
+    }
     // Count how many killing blows a hero got
     private int countKillingBlows(MatchHero hero) {
         int count = 0;

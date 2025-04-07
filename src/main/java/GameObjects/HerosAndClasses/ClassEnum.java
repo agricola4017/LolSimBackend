@@ -3,15 +3,15 @@ package GameObjects.HerosAndClasses;
 import java.util.Random;
 
 public enum ClassEnum {
-    FIGHTER(5, 20), //100, 60,250
-    MAGE(1, 35),
-    TANK(10, 8);
+    FIGHTER(100, 20), //100, 60,250
+    MAGE(60, 35),
+    TANK(250, 8);
 
     private final int defaultHP;
     private final int defaultAttack;
     private int hp;
     private int attack;
-
+    
     ClassEnum(int hp, int attack) {
         this.defaultHP = hp;
         this.defaultAttack = attack;

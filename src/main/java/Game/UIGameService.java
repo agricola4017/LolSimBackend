@@ -514,7 +514,7 @@ public class UIGameService {
     }   
 
     void refreshOrCreatePlayerInfo() {
-        gameUIGenerator.createOrUpdateTextPanel(PLAYERINFO_PANELLID, "Player Info", Player.getColumnHeaders() + "\n" + flattenListString(game.getActivePlayers()));
+        gameUIGenerator.createOrUpdateTextPanel(PLAYERINFO_PANELLID, "Player Info", Player.getPlayerColumnNames() + "\n" + flattenListString(game.getActivePlayers()));
     }
 
 }

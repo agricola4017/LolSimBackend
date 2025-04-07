@@ -13,6 +13,8 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import GameObjects.HerosAndClasses.HeroFactory;
+
 /**
  * Season Class
  * 
@@ -239,6 +241,7 @@ public abstract class Season implements Serializable {
             Standing s = standings.get(i);
             s.getTeam().addPlacement(i + 1, splitCount);
         }
+        HeroFactory.resetStatsTrackers();
     }
 
     public List<Team> repopulateTeamInOrderOfStandings() {

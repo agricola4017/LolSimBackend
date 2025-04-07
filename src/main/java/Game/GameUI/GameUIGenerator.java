@@ -642,6 +642,7 @@ public class GameUIGenerator {
         table.getTableHeader().setForeground(Color.BLACK);
         table.getTableHeader().setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,

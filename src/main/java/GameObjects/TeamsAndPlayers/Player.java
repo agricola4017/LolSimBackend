@@ -261,10 +261,6 @@ public class Player implements Serializable {
                 " | " + cs/gp + " " + " | " + gold/gp + 
                 " | " + yearsWithTeam + " | " + yearsStartingWithTeam;
     }
-    
-    public static String getColumnHeaders() {
-        return "ID | Name | Age | main | Position | OVR/POT | KDA | CS/Gold | YWT | YSWT";
-    }
 
     public static String[] getPlayerColumnNames() {
         return new String[]{
